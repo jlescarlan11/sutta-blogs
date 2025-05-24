@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model BlogEntry {
+model Blog {
   id           String   @id @default(uuid())
   title        String   @db.VarChar(55)
   content      String   @db.Text
