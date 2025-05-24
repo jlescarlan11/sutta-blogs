@@ -1,11 +1,13 @@
-import { Button, TextArea, TextField } from "@radix-ui/themes";
-import React from "react";
+"use client";
+import { Button, TextField } from "@radix-ui/themes";
+import "easymde/dist/easymde.min.css";
+import SimpleMDE from "react-simplemde-editor";
 
 const NewBlogPage = () => {
   return (
     <div className="max-w-xl space-y-2">
       <TextField.Root placeholder="Title"></TextField.Root>
-      <TextArea placeholder="Content" />
+      <SimpleMDE placeholder="Content" />
       <Button>Submit New Blog</Button>
     </div>
   );
