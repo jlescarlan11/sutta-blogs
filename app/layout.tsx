@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import { Inter, Fira_Sans } from "next/font/google";
-import "./globals.css";
-import "@radix-ui/themes/styles.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+import type { Metadata } from "next";
+import { Fira_Sans, Inter } from "next/font/google";
+import "./globals.css";
 import NavBar from "./NavBar";
 
 // Configure Inter as default font
