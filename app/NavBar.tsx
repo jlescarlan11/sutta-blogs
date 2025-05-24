@@ -1,9 +1,16 @@
+"use client";
 import Link from "next/link";
 import React from "react";
 import Logo from "./Logo";
 import { Flex } from "@radix-ui/themes";
+import { usePathname } from "next/navigation";
+import classnames from "classnames";
+import classNames from "classnames";
 
 const NavBar = () => {
+  const currentPath = usePathname();
+  console.log(currentPath);
+
   const links = [
     { label: "Dashboard", href: "/" },
     { label: "My Blogs", href: "/blogs" },
@@ -20,7 +27,11 @@ const NavBar = () => {
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-[var(--plum-11)] hover:text-[var(--plum-12)] transition-colors"
+              className={classNames({
+                "text-[var(--plum-12)]": link.href === currentPath,
+                "text-[var(--plum-11)]": link.href !== currentPath,
+                "hover:text-[var(--plum-12)] transition-colors": true,
+              })}
             >
               {link.label}
             </Link>
