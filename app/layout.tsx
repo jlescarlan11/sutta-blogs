@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Fira_Sans } from "next/font/google";
 import "./globals.css";
+import "@radix-ui/themes/styles.css";
+import { Theme, ThemePanel } from "@radix-ui/themes";
+import NavBar from "./NavBar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Configure Inter as default font
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Configure Fira Sans for headings
+const firaSans = Fira_Sans({
   subsets: ["latin"],
+  variable: "--font-fira-sans",
+  weight: ["400", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,11 +31,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" className={`${inter.variable} ${firaSans.variable}`}>
+      <body className="antialiased">
+        <Theme accentColor="plum">
+          <NavBar />
+          <main>{children}</main>
+          <ThemePanel />
+        </Theme>
       </body>
     </html>
   );
