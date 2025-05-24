@@ -35,7 +35,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Theme accentColor="plum">
           <NavBar />
-          <main>{children}</main>
+          <main className="p-4">{children}</main>
           <ThemePanel />
         </Theme>
       </body>
