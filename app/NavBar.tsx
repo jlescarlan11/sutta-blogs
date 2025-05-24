@@ -1,11 +1,9 @@
 "use client";
-import Link from "next/link";
-import React from "react";
-import Logo from "./Logo";
 import { Flex } from "@radix-ui/themes";
-import { usePathname } from "next/navigation";
-import classnames from "classnames";
 import classNames from "classnames";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Logo from "./Logo";
 
 const NavBar = () => {
   const currentPath = usePathname();
