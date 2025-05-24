@@ -1,5 +1,6 @@
 import { Theme, ThemePanel } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
+import "./theme-config.css";
 import type { Metadata } from "next";
 import { Fira_Sans, Inter } from "next/font/google";
 import "./globals.css";
