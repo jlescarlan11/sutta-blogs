@@ -6,7 +6,7 @@
 
   /* If using Radix UI's theme, override their font variables */
   --default-font-family: var(--font-inter), sans-serif;
-  --heading-font-family: var(--font-fira-sans), sans-serif;
+  --heading-font-family: var(--font-lora), sans-serif;
 }
 
 /* Apply Fira Sans to headings */
@@ -16,11 +16,32 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-fira-sans), sans-serif;
-  font-weight: 600; /* Adjust as needed */
+  font-family: var(--font-lora), sans-serif;
+
+  font-weight: 500; /* Adjust as needed */
+}
+
+h1 {
+  font-size: xx-large;
+}
+
+h2 {
+  font-size: x-large;
+}
+
+h3 {
+  font-size: larger;
+}
+
+h4 {
+  font-size: large;
 }
 
 /* Optional: If you want to use Fira Sans in specific components */
 .heading-font {
-  font-family: var(--font-fira-sans), sans-serif;
+  font-family: var(--font-lora), sans-serif;
+}
+
+html {
+  background-color: var(--plum-1);
 }

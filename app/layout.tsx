@@ -1,10 +1,10 @@
-import { Theme, ThemePanel } from "@radix-ui/themes";
+import { Container, Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import "./theme-config.css";
 import type { Metadata } from "next";
-import { Fira_Sans, Inter } from "next/font/google";
+import { Inter, Lora, Mansalva } from "next/font/google";
 import "./globals.css";
 import NavBar from "./NavBar";
+import "./theme-config.css";
 
 // Configure Inter as default font
 const inter = Inter({
@@ -13,11 +13,18 @@ const inter = Inter({
   display: "swap",
 });
 
-// Configure Fira Sans for headings
-const firaSans = Fira_Sans({
+const mansalva = Mansalva({
   subsets: ["latin"],
-  variable: "--font-fira-sans",
-  weight: ["400", "600", "700"],
+  variable: "--font-mansalva",
+  weight: ["400"],
+  display: "swap",
+});
+
+// Configure Fira Sans for headings
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -32,12 +39,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${firaSans.variable}`}>
-      <body className="antialiased">
-        <Theme accentColor="plum">
-          <NavBar />
-          <main className="p-4">{children}</main>
-          <ThemePanel />
+    <html
+      lang="en"
+      className={`${inter.variable} ${mansalva.variable} ${lora.variable}`}
+    >
+      <body className="antialiased ">
+        <Theme accentColor="plum" radius="full">
+          <Flex className="flex-col bg-[var(--plum-1)] text-[var(--plum-11)] min-h-dvh">
+            <Container>
+              <NavBar />
+              <main className="p-4">{children}</main>
+            </Container>
+          </Flex>
         </Theme>
       </body>
     </html>

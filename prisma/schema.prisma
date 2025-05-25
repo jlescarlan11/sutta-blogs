@@ -17,9 +17,11 @@ model Blog {
   id           String   @id @default(uuid())
   title        String   @db.VarChar(55)
   content      String   @db.Text
+  readTime     Int      @default(0)
   viewCount    Int      @default(0)
   likeCount    Int      @default(0)
   commentCount Int      @default(0)
+  published    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
