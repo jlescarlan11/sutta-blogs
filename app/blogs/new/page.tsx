@@ -1,5 +1,5 @@
 "use client";
-
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Badge,
   Box,
@@ -7,20 +7,22 @@ import {
   Callout,
   Container,
   Flex,
-  Separator,
   Text,
   TextField,
 } from "@radix-ui/themes";
+import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import SimpleMDE from "react-simplemde-editor";
-import { useState } from "react";
-import { z } from "zod";
-import axios from "axios";
 import { LuEye, LuInfo, LuSave } from "react-icons/lu";
+import { z } from "zod";
+import dynamic from "next/dynamic";
+
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+});
 
 const createBlogSchema = z.object({
   title: z.string().min(1).max(55),
@@ -35,12 +37,34 @@ const NewBlogPage = () => {
   const [isDraft, setIsDraft] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  const delay = 1000;
+  const [contentValue, setContentValue] = useState("");
+
+  useEffect(() => {
+    setIsClient(true);
+    setContentValue(localStorage.getItem("autosaved_blog_content") || "");
+  }, []);
+
+  const anOptions = useMemo(() => {
+    return {
+      autosave: {
+        enabled: true,
+        uniqueId: "autosaved_blog_content",
+        delay,
+        submit_delay: delay,
+      },
+      spellChecker: false,
+    };
+  }, [delay]);
 
   const {
     register,
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BlogFormData>({
     resolver: zodResolver(createBlogSchema),
@@ -50,6 +74,22 @@ const NewBlogPage = () => {
       published: false,
     },
   });
+
+  useEffect(() => {
+    setValue("published", !isDraft);
+  }, [isDraft, setValue]);
+
+  useEffect(() => {
+    if (!isClient) return;
+
+    const interval = setInterval(() => {
+      const currentContent = watch("content");
+      if (currentContent) {
+        localStorage.setItem("autosaved_blog_content", currentContent);
+      }
+    }, delay);
+    return () => clearInterval(interval);
+  }, [watch, delay, isClient]);
 
   const content = watch("content");
   const title = watch("title");
@@ -66,8 +106,12 @@ const NewBlogPage = () => {
       setIsSubmitting(true);
       await axios.post("/api/blogs", {
         ...data,
+        published: !isDraft,
         readTime,
       });
+      if (isClient) {
+        localStorage.removeItem("autosaved_blog_content");
+      }
       router.push("/blogs");
     } catch (err) {
       console.error(err);
@@ -76,9 +120,20 @@ const NewBlogPage = () => {
     }
   });
 
+  if (!isClient) {
+    return (
+      <Container
+        size="4"
+        className="min-h-screen flex items-center justify-center"
+      >
+        <Text>Loading editor...</Text>
+      </Container>
+    );
+  }
+
   return (
     <Box className="min-h-screen">
-      <Container size="4" className="py-6 sm:py-8">
+      <Container size="4" className="">
         <form onSubmit={onSubmit}>
           <Flex direction="column" gap="6">
             <Box>
@@ -176,7 +231,12 @@ const NewBlogPage = () => {
                         render={({ field }) => (
                           <SimpleMDE
                             placeholder="Enter your blog content..."
-                            {...field}
+                            value={contentValue}
+                            onChange={(val) => {
+                              setContentValue(val);
+                              field.onChange(val);
+                            }}
+                            options={anOptions}
                           />
                         )}
                       />
@@ -215,7 +275,9 @@ const NewBlogPage = () => {
                       variant="soft"
                       onClick={() => {
                         setIsDraft(true);
-                        handleSubmit(onSubmit)();
+                        handleSubmit((data) => {
+                          onSubmit({ ...data, published: false });
+                        })();
                       }}
                       disabled={
                         isSubmitting || (!title.trim() && !content.trim())
