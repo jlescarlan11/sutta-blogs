@@ -1,4 +1,5 @@
 "use client";
+import { createBlogSchema } from "@/app/ValidationSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Badge,
@@ -14,21 +15,11 @@ import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuEye, LuInfo, LuSave } from "react-icons/lu";
+import SimpleMDE from "react-simplemde-editor";
 import { z } from "zod";
-import dynamic from "next/dynamic";
-
-const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
-  ssr: false,
-});
-
-const createBlogSchema = z.object({
-  title: z.string().min(1).max(55),
-  content: z.string().min(1),
-  published: z.boolean(),
-});
 
 type BlogFormData = z.infer<typeof createBlogSchema>;
 
@@ -37,27 +28,6 @@ const NewBlogPage = () => {
   const [isDraft, setIsDraft] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  const delay = 1000;
-  const [contentValue, setContentValue] = useState("");
-
-  useEffect(() => {
-    setIsClient(true);
-    setContentValue(localStorage.getItem("autosaved_blog_content") || "");
-  }, []);
-
-  const anOptions = useMemo(() => {
-    return {
-      autosave: {
-        enabled: true,
-        uniqueId: "autosaved_blog_content",
-        delay,
-        submit_delay: delay,
-      },
-      spellChecker: false,
-    };
-  }, [delay]);
 
   const {
     register,
@@ -74,22 +44,6 @@ const NewBlogPage = () => {
       published: false,
     },
   });
-
-  useEffect(() => {
-    setValue("published", !isDraft);
-  }, [isDraft, setValue]);
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    const interval = setInterval(() => {
-      const currentContent = watch("content");
-      if (currentContent) {
-        localStorage.setItem("autosaved_blog_content", currentContent);
-      }
-    }, delay);
-    return () => clearInterval(interval);
-  }, [watch, delay, isClient]);
 
   const content = watch("content");
   const title = watch("title");
@@ -109,9 +63,6 @@ const NewBlogPage = () => {
         published: !isDraft,
         readTime,
       });
-      if (isClient) {
-        localStorage.removeItem("autosaved_blog_content");
-      }
       router.push("/blogs");
     } catch (err) {
       console.error(err);
@@ -119,17 +70,6 @@ const NewBlogPage = () => {
       setIsSubmitting(false);
     }
   });
-
-  if (!isClient) {
-    return (
-      <Container
-        size="4"
-        className="min-h-screen flex items-center justify-center"
-      >
-        <Text>Loading editor...</Text>
-      </Container>
-    );
-  }
 
   return (
     <Box className="min-h-screen">
@@ -231,12 +171,7 @@ const NewBlogPage = () => {
                         render={({ field }) => (
                           <SimpleMDE
                             placeholder="Enter your blog content..."
-                            value={contentValue}
-                            onChange={(val) => {
-                              setContentValue(val);
-                              field.onChange(val);
-                            }}
-                            options={anOptions}
+                            {...field}
                           />
                         )}
                       />
@@ -275,9 +210,7 @@ const NewBlogPage = () => {
                       variant="soft"
                       onClick={() => {
                         setIsDraft(true);
-                        handleSubmit((data) => {
-                          onSubmit({ ...data, published: false });
-                        })();
+                        setValue("published", false);
                       }}
                       disabled={
                         isSubmitting || (!title.trim() && !content.trim())
@@ -292,6 +225,7 @@ const NewBlogPage = () => {
                       type="submit"
                       onClick={() => {
                         setIsDraft(false);
+                        setValue("published", true);
                       }}
                       disabled={
                         isSubmitting ||
@@ -310,36 +244,6 @@ const NewBlogPage = () => {
           </Flex>
         </form>
       </Container>
-
-      <style jsx global>{`
-        .blog-editor .CodeMirror {
-          border: none;
-          font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
-            "Liberation Mono", Menlo, monospace;
-          font-size: 14px;
-          line-height: 1.6;
-        }
-
-        .blog-editor .editor-toolbar {
-          border: none;
-          border-bottom: 1px solid #e5e7eb;
-          background: var(--plum-3);
-        }
-
-        .blog-editor .editor-toolbar button {
-          color: var(--plum-11);
-        }
-
-        .blog-editor .editor-toolbar button:hover {
-          color: var(--plum-12);
-          background: var(--plum-3);
-        }
-
-        .blog-editor .editor-statusbar {
-          color: #9ca3af;
-          font-size: 12px;
-        }
-      `}</style>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { Flex, Theme, ThemePanel } from "@radix-ui/themes";
+import { Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
 import { Inter, Lora, Mansalva } from "next/font/google";
