@@ -79,34 +79,34 @@ const NewBlogPage = () => {
             <Box>
               <Flex justify="between" align="center" wrap="wrap" gap="4">
                 <Flex direction="column" gap="2">
-                  <Flex
-                    align="center"
-                    gap="2"
-                    className="text-sm text-gray-600"
-                  >
+                  <Flex align="center" gap="2" className="text-sm ">
                     <Link
                       href="/"
-                      className="hover:underline text-gray-600 flex items-center gap-1"
+                      className="hover:underline flex items-center gap-1"
                     >
-                      Dashboard
+                      <Text>Dashboard</Text>
                     </Link>
                     <span>/</span>
-                    <Link
-                      href="/blogs"
-                      className="hover:underline text-gray-600"
-                    >
-                      Blogs
+                    <Link href="/blogs" className="hover:underline ">
+                      <Text>Blogs</Text>
                     </Link>
                     <span>/</span>
-                    <Text className="text-gray-400">New Blog</Text>
+                    <Text className="text-[var(--plum-8)]">New Blog</Text>
                   </Flex>
-                  <Flex align="center" gap="3" className="mt-4">
-                    <Text size="6" weight="bold">
-                      Create New Blog
-                    </Text>
-                    <Badge color={isDraft ? "orange" : "green"} variant="soft">
-                      {isDraft ? "Draft" : "Ready to Publish"}
-                    </Badge>
+                  <Flex direction="column" gap="2">
+                    <Flex align="center" gap="2" className="mt-4">
+                      <Text size="6" weight="bold">
+                        Create New Blog
+                      </Text>
+
+                      <Badge
+                        color={isDraft ? "orange" : "green"}
+                        variant="soft"
+                      >
+                        {isDraft ? "Draft" : "Ready to Publish"}
+                      </Badge>
+                    </Flex>
+                    <Text>Create new blog and share it to people.</Text>
                   </Flex>
                 </Flex>
               </Flex>

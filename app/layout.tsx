@@ -1,4 +1,4 @@
-import { Flex, Theme } from "@radix-ui/themes";
+import { Container, Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
 import { Inter, Lora, Mansalva } from "next/font/google";
@@ -46,8 +46,10 @@ export default function RootLayout({
       <body className="antialiased ">
         <Theme accentColor="plum" radius="full">
           <Flex className="flex-col bg-[var(--plum-1)] text-[var(--plum-11)] min-h-dvh">
-            <NavBar />
-            <main className="p-4">{children}</main>
+            <Container>
+              <NavBar />
+              <main className="p-4">{children}</main>
+            </Container>
           </Flex>
         </Theme>
       </body>
