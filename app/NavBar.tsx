@@ -25,7 +25,7 @@ const NavBar = () => {
 
   return (
     <Box className="nav">
-      <Container className="p-4 sm:p-8">
+      <Container className="px-4 py-8">
         <Flex align="center">
           <Flex align="center" gap="4" flexGrow="1">
             <Box>
