@@ -48,6 +48,7 @@ export default function RootLayout({
           <Flex className="flex-col bg-[var(--plum-1)] text-[var(--plum-11)] min-h-dvh">
             <Container>
               <NavBar />
+              <p>I need to push.</p>
               <main className="p-4">{children}</main>
             </Container>
           </Flex>
