@@ -1,10 +1,9 @@
 // app/blogs/BlogsTable.tsx (new client component)
 "use client";
 
-import { Table, Button, Checkbox, Flex } from "@radix-ui/themes";
+import { Button, Checkbox, Flex, Table } from "@radix-ui/themes";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Blog {
@@ -17,7 +16,6 @@ interface Blog {
 const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
   const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
   const [blogList, setBlogList] = useState<Blog[]>(blogs);
-  const router = useRouter();
 
   const toggleBlogSelection = (blogId: string) => {
     setSelectedBlogs((prev) =>
