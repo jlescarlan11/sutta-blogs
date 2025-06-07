@@ -117,19 +117,21 @@ model UserCommentLike {
 }
 
 model UserLiked {
-  userId String
-  blogId String
-  user   User      @relation(fields: [userId], references: [id])
-  blog   BlogEntry @relation(fields: [blogId], references: [id])
+  userId    String
+  blogId    String
+  user      User      @relation(fields: [userId], references: [id])
+  blog      BlogEntry @relation(fields: [blogId], references: [id])
+  createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
 }
 
 model UserViewed {
-  userId String
-  blogId String
-  user   User      @relation(fields: [userId], references: [id])
-  blog   BlogEntry @relation(fields: [blogId], references: [id])
+  userId    String
+  blogId    String
+  user      User      @relation(fields: [userId], references: [id])
+  blog      BlogEntry @relation(fields: [blogId], references: [id])
+  createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
 }

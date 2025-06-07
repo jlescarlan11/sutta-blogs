@@ -16,8 +16,7 @@ import Logo from "./Logo";
 
 const NavBar = () => {
   const currentPath = usePathname();
-  console.log(currentPath);
-  const { status, data: session } = useSession();
+  const { status } = useSession();
 
   const links = [
     { label: "dashboard", href: "/" },

@@ -1,49 +1,44 @@
 // app/blogs/[id]/page.tsx
+import authOptions from "@/app/auth/authOptions";
 import prisma from "@/prisma/client";
+import { Blog } from "@/types";
+import { Box, Container, Flex, Text } from "@radix-ui/themes";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Avatar, Box, Container, Flex, Text } from "@radix-ui/themes";
+import {
+  FaCalendarAlt,
+  FaChevronRight,
+  FaRegClock,
+  FaRegCommentDots,
+  FaRegEye,
+  FaUser,
+} from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Link from "next/link";
-import { FaUser, FaRegHeart, FaShareAlt, FaRegCommentDots, FaRegEye, FaRegClock, FaCalendarAlt, FaChevronRight } from "react-icons/fa";
+import CommentLikeButton from "./CommentLikeButton";
+import LikeButton from "./LikeButton";
+import ShareButton from "./ShareButton";
+import ViewCounter from "./ViewCounter";
 
 interface Props {
   params: { id: string };
 }
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  blogId: string;
-  user: User;
-  likes?: { id: string }[];
-}
-
-interface Blog {
-  id: string;
-  title: string;
-  content: string;
-  isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  author: User;
-  comments: Comment[];
+interface BlogWithCounts extends Blog {
+  _count: {
+    comments: number;
+    likes: number;
+    views: number;
+  };
+  likes: { userId: string; blogId: string }[];
 }
 
 const BlogDetailPage = async ({ params }: Props) => {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
   const blog = (await prisma.blogEntry.findUnique({
     where: {
       id: params.id,
@@ -53,12 +48,26 @@ const BlogDetailPage = async ({ params }: Props) => {
       comments: {
         include: {
           user: true,
+          likes: true,
+        },
+      },
+      likes: true,
+      views: true,
+      _count: {
+        select: {
+          comments: true,
+          likes: true,
+          views: true,
         },
       },
     },
-  })) as Blog | null;
+  })) as BlogWithCounts | null;
 
   if (!blog) notFound();
+
+  // Calculate read time (assuming average reading speed of 200 words per minute)
+  const wordCount = blog.content.split(/\s+/).length;
+  const readTime = Math.ceil(wordCount / 200);
 
   return (
     <Container>
@@ -73,19 +82,25 @@ const BlogDetailPage = async ({ params }: Props) => {
           </Flex>
           <Flex gap="1" align="center">
             <FaCalendarAlt />
-            <Text size="2">{new Date(blog.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</Text>
+            <Text size="2">
+              {new Date(blog.createdAt).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </Text>
           </Flex>
           <Flex gap="1" align="center">
             <FaRegClock />
-            <Text size="2">20 mins</Text>
+            <Text size="2">{readTime} mins</Text>
           </Flex>
           <Flex gap="1" align="center">
             <FaRegEye />
-            <Text size="2">20</Text>
+            <Text size="2">{blog._count.views}</Text>
           </Flex>
           <Flex gap="1" align="center">
             <FaRegCommentDots />
-            <Text size="2">20</Text>
+            <Text size="2">{blog._count.comments}</Text>
           </Flex>
         </Flex>
         <Box className="mb-2">
@@ -94,41 +109,73 @@ const BlogDetailPage = async ({ params }: Props) => {
           </ReactMarkdown>
         </Box>
         <Flex gap="4" align="center" mb="2">
-          <Flex gap="1" align="center">
-            <FaRegHeart />
-            <Text size="2">20</Text>
-          </Flex>
-          <FaShareAlt className="cursor-pointer" />
+          <LikeButton
+            blogId={blog.id}
+            initialLikes={blog._count.likes}
+            isLiked={blog.likes.some((like) => like.userId === userId)}
+          />
+          <ShareButton blogId={blog.id} />
         </Flex>
-        <Link href={`/blogs/${blog.id}/comments`} passHref legacyBehavior>
-          <Flex align="center" gap="2" className="cursor-pointer text-[var(--plum-11)] hover:underline" mb="2">
+        <Link href={`/blogs/${blog.id}/comments`} passHref>
+          <Flex
+            align="center"
+            gap="2"
+            className="cursor-pointer text-[var(--plum-11)] hover:underline"
+            mb="2"
+          >
             <FaRegCommentDots />
-            <Text size="3" weight="bold">Comments</Text>
+            <Text size="3" weight="bold">
+              Comments
+            </Text>
             <FaChevronRight />
           </Flex>
         </Link>
-        <Box asChild><hr className="my-2 border-[var(--plum-6)]" /></Box>
+        <Box asChild>
+          <hr className="my-2 border-[var(--plum-6)]" />
+        </Box>
         {/* Top 3 comments */}
         {blog.comments.length === 0 ? (
-          <Text size="2" color="gray" className="italic">No comments yet.</Text>
+          <Text size="2" color="gray" className="italic">
+            No comments yet.
+          </Text>
         ) : (
           [...blog.comments]
-            .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+            .sort((a, b) => b.likes.length - a.likes.length)
             .slice(0, 3)
             .map((comment, idx, arr) => (
               <React.Fragment key={comment.id}>
                 <Box className="mb-2">
-                  <Text weight="bold" size="2">{comment.user.name}</Text>
+                  <Text weight="bold" size="2">
+                    {comment.user.name}
+                  </Text>
                   <Text size="2" className="block mb-1">
-                    {new Date(comment.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                    {new Date(comment.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </Text>
                   <Text size="2">{comment.content}</Text>
+                  <Flex gap="1" align="center" mt="1">
+                    <CommentLikeButton
+                      commentId={comment.id}
+                      initialLikes={comment.likes.length}
+                      isLiked={comment.likes.some(
+                        (like) => like.userId === userId
+                      )}
+                    />
+                  </Flex>
                 </Box>
-                {idx < arr.length - 1 && <Box asChild><hr className="my-2 border-[var(--plum-6)]" /></Box>}
+                {idx < arr.length - 1 && (
+                  <Box asChild>
+                    <hr className="my-2 border-[var(--plum-6)]" />
+                  </Box>
+                )}
               </React.Fragment>
             ))
         )}
       </Box>
+      <ViewCounter blogId={blog.id} />
     </Container>
   );
 };

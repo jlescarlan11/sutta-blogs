@@ -5,35 +5,7 @@ import { Button, Checkbox, Flex, Table } from "@radix-ui/themes";
 import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  blogId: string;
-  user: User;
-}
-
-interface Blog {
-  id: string;
-  title: string;
-  content: string;
-  isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  author: User;
-  comments: Comment[];
-}
+import { Blog } from "@/types";
 
 interface Props {
   blogs: Blog[];
