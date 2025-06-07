@@ -40,6 +40,7 @@ model BlogEntry {
   title       String
   content     String
   isPublished Boolean         @default(false)
+  readTime    Int            @default(0)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime
   userId      String

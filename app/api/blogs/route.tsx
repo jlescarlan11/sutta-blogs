@@ -1,20 +1,31 @@
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createBlogSchema } from "../../ValidationSchema";
+import { getServerSession } from "next-auth";
+import authOptions from "@/app/auth/authOptions";
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const validation = createBlogSchema.safeParse(body);
 
   if (!validation.success)
     return NextResponse.json(validation.error.errors, { status: 400 });
 
-  const newBlog = await prisma.blog.create({
+  const newBlog = await prisma.blogEntry.create({
     data: {
       title: body.title,
       content: body.content,
+      isPublished: body.isPublished,
       readTime: body.readTime,
-      published: body.published,
+      createdAt: body.createdAt,
+      updatedAt: body.updatedAt,
+      userId: session.user.id,
     },
   });
 
@@ -28,14 +39,14 @@ export async function DELETE(request: NextRequest) {
     if (!ids)
       return NextResponse.json({ error: "No IDs provided" }, { status: 400 });
 
-    const blogs = await prisma.blog.findMany({
+    const blogs = await prisma.blogEntry.findMany({
       where: {
-        id: {
+        blogId: {
           in: ids,
         },
       },
       select: {
-        id: true,
+        blogId: true,
       },
     });
 
@@ -46,10 +57,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.blog.deleteMany({
+    await prisma.blogEntry.deleteMany({
       where: {
-        id: {
-          in: blogs.map((blog) => blog.id),
+        blogId: {
+          in: blogs.map((blog) => blog.blogId),
         },
       },
     });
