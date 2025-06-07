@@ -41,7 +41,7 @@ const NewBlogPage = () => {
     defaultValues: {
       title: "",
       content: "",
-      published: false,
+      isPublished: false,
     },
   });
 
@@ -58,18 +58,34 @@ const NewBlogPage = () => {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsSubmitting(true);
+      const now = new Date();
       await axios.post("/api/blogs", {
         ...data,
-        published: !isDraft,
+        isPublished: !isDraft,
         readTime,
+        createdAt: now,
+        updatedAt: now,
       });
       router.push("/blogs");
+      router.refresh();
     } catch (err) {
       console.error(err);
       setError("An unexpected error occurred. Please try again.");
       setIsSubmitting(false);
     }
   });
+
+  const handleSaveDraft = () => {
+    setIsDraft(true);
+    setValue("isPublished", false);
+    onSubmit();
+  };
+
+  const handlePublish = () => {
+    setIsDraft(false);
+    setValue("isPublished", true);
+    onSubmit();
+  };
 
   return (
     <Box className="min-h-screen">
@@ -207,11 +223,9 @@ const NewBlogPage = () => {
 
                   <Flex align="center" gap="3">
                     <Button
+                      type="button"
                       variant="soft"
-                      onClick={() => {
-                        setIsDraft(true);
-                        setValue("published", false);
-                      }}
+                      onClick={handleSaveDraft}
                       disabled={
                         isSubmitting || (!title.trim() && !content.trim())
                       }
@@ -222,11 +236,8 @@ const NewBlogPage = () => {
                     </Button>
 
                     <Button
-                      type="submit"
-                      onClick={() => {
-                        setIsDraft(false);
-                        setValue("published", true);
-                      }}
+                      type="button"
+                      onClick={handlePublish}
                       disabled={
                         isSubmitting ||
                         !title.trim() ||

@@ -6,11 +6,33 @@ import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
 
-interface Blog {
-  id: string;
-  title: string;
+interface User {
+  userId: string;
+  name: string;
+  email: string;
+  image: string;
+}
+
+interface Comment {
+  commentId: string;
+  content: string;
   createdAt: Date;
-  published: boolean;
+  updatedAt: Date;
+  userId: string;
+  blogId: string;
+  user: User;
+}
+
+interface Blog {
+  blogId: string;
+  title: string;
+  content: string;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  author: User;
+  comments: Comment[];
 }
 
 const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
@@ -29,7 +51,7 @@ const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
     if (selectedBlogs.length === blogs.length) {
       setSelectedBlogs([]);
     } else {
-      setSelectedBlogs(blogs.map((blog) => blog.id));
+      setSelectedBlogs(blogs.map((blog) => blog.blogId));
     }
   };
 
@@ -40,7 +62,7 @@ const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
       console.log({ data: selectedBlogs });
       await axios.delete("/api/blogs", { data: { ids: selectedBlogs } });
       setBlogList((prev) =>
-        prev.filter((blog) => !selectedBlogs.includes(blog.id))
+        prev.filter((blog) => !selectedBlogs.includes(blog.blogId))
       );
       setSelectedBlogs([]);
     } catch (error) {
@@ -80,25 +102,29 @@ const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
               />
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Title</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Author</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Comments</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Status</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {blogList.map((blog) => (
-            <Table.Row key={blog.id}>
+            <Table.Row key={blog.blogId}>
               <Table.Cell>
                 <Checkbox
-                  checked={selectedBlogs.includes(blog.id)}
-                  onCheckedChange={() => toggleBlogSelection(blog.id)}
+                  checked={selectedBlogs.includes(blog.blogId)}
+                  onCheckedChange={() => toggleBlogSelection(blog.blogId)}
                 />
               </Table.Cell>
               <Table.RowHeaderCell>{blog.title}</Table.RowHeaderCell>
+              <Table.Cell>{blog.author.name}</Table.Cell>
               <Table.Cell>{blog.createdAt.toDateString()}</Table.Cell>
-              <Table.Cell>{blog.published ? "Published" : "Draft"}</Table.Cell>
+              <Table.Cell>{blog.comments.length}</Table.Cell>
+              <Table.Cell>{blog.isPublished ? "Published" : "Draft"}</Table.Cell>
               <Table.Cell>
-                <Link href={`/blogs/${blog.id}`}>View</Link>
+                <Link href={`/blogs/${blog.blogId}`}>View</Link>
               </Table.Cell>
             </Table.Row>
           ))}

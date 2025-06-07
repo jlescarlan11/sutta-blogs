@@ -13,15 +13,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Blog {
-  id           String   @id @default(uuid())
-  title        String   @db.VarChar(55)
-  content      String   @db.Text
-  readTime     Int      @default(0)
-  viewCount    Int      @default(0)
-  likeCount    Int      @default(0)
-  commentCount Int      @default(0)
-  published    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model User {
+  userId    String          @id @default(uuid())
+  name      String
+  email     String
+  image     String
+  blogs     BlogEntry[]
+  followers UserFollowed[]  @relation("follower")
+  following UserFollowed[]  @relation("followee")
+  comments  UserCommented[]
+  likes     UserLiked[]
+  views     UserViewed[]
+}
+
+model UserFollowed {
+  followerId String
+  followeeId String
+  follower   User   @relation("follower", fields: [followerId], references: [userId])
+  followee   User   @relation("followee", fields: [followeeId], references: [userId])
+
+  @@id([followerId, followeeId])
+}
+
+model BlogEntry {
+  blogId      String          @id @default(uuid())
+  title       String
+  content     String
+  isPublished Boolean         @default(false)
+  readTime    Int            @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime
+  userId      String
+  author      User            @relation(fields: [userId], references: [userId])
+  comments    UserCommented[]
+  likes       UserLiked[]
+  views       UserViewed[]
+}
+
+model UserCommented {
+  commentId String    @id
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  userId    String
+  blogId    String
+  user      User      @relation(fields: [userId], references: [userId])
+  blog      BlogEntry @relation(fields: [blogId], references: [blogId])
+}
+
+model UserLiked {
+  userId String
+  blogId String
+  user   User      @relation(fields: [userId], references: [userId])
+  blog   BlogEntry @relation(fields: [blogId], references: [blogId])
+
+  @@id([userId, blogId])
+}
+
+model UserViewed {
+  userId String
+  blogId String
+  user   User      @relation(fields: [userId], references: [userId])
+  blog   BlogEntry @relation(fields: [blogId], references: [blogId])
+
+  @@id([userId, blogId])
 }
