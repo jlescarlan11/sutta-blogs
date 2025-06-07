@@ -8,14 +8,16 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import classNames from "classnames";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "./Logo";
 import { LuSearch } from "react-icons/lu";
+import Logo from "./Logo";
 
 const NavBar = () => {
   const currentPath = usePathname();
   console.log(currentPath);
+  const { status, data: session } = useSession();
 
   const links = [
     { label: "dashboard", href: "/" },
@@ -49,6 +51,14 @@ const NavBar = () => {
                   </li>
                 ))}
               </ul>
+              <Box>
+                {status === "authenticated" && (
+                  <Link href="api/auth/signout">Log Out</Link>
+                )}
+                {status === "unauthenticated" && (
+                  <Link href="api/auth/signin">Log In</Link>
+                )}
+              </Box>
             </Box>
           </Flex>
           <Flex align="center" gap="4">

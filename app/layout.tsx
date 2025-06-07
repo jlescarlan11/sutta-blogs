@@ -5,6 +5,7 @@ import { Inter, Lora, Mansalva } from "next/font/google";
 import "./globals.css";
 import NavBar from "./NavBar";
 import "./theme-config.css";
+import AuthProvider from "./auth/Provider";
 
 // Configure Inter as default font
 const inter = Inter({
@@ -44,15 +45,17 @@ export default function RootLayout({
       className={`${inter.variable} ${mansalva.variable} ${lora.variable}`}
     >
       <body className="antialiased ">
-        <Theme accentColor="plum" radius="full">
-          <Flex className="flex-col bg-[var(--plum-1)] text-[var(--plum-11)] min-h-dvh">
-            <Container>
-              <NavBar />
-              <p>I need to push. again</p>
-              <main className="p-4">{children}</main>
-            </Container>
-          </Flex>
-        </Theme>
+        <AuthProvider>
+          <Theme accentColor="plum" radius="full">
+            <Flex className="flex-col bg-[var(--plum-1)] text-[var(--plum-11)] min-h-dvh">
+              <Container>
+                <NavBar />
+                <p>I need to push. again</p>
+                <main className="p-4">{children}</main>
+              </Container>
+            </Flex>
+          </Theme>
+        </AuthProvider>
       </body>
     </html>
   );

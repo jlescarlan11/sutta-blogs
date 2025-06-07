@@ -7,14 +7,14 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface User {
-  userId: string;
+  id: string;
   name: string;
   email: string;
   image: string;
 }
 
 interface Comment {
-  commentId: string;
+  id: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +24,7 @@ interface Comment {
 }
 
 interface Blog {
-  blogId: string;
+  id: string;
   title: string;
   content: string;
   isPublished: boolean;
@@ -35,36 +35,37 @@ interface Blog {
   comments: Comment[];
 }
 
-const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
-  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
-  const [blogList, setBlogList] = useState<Blog[]>(blogs);
+interface Props {
+  blogs: Blog[];
+}
 
-  const toggleBlogSelection = (blogId: string) => {
+const BlogTable = ({ blogs }: Props) => {
+  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
+
+  const toggleBlogSelection = (id: string) => {
     setSelectedBlogs((prev) =>
-      prev.includes(blogId)
-        ? prev.filter((id) => id !== blogId)
-        : [...prev, blogId]
+      prev.includes(id)
+        ? prev.filter((blogId) => blogId !== id)
+        : [...prev, id]
     );
   };
 
-  const toggleAllBlogs = () => {
-    if (selectedBlogs.length === blogs.length) {
-      setSelectedBlogs([]);
-    } else {
-      setSelectedBlogs(blogs.map((blog) => blog.blogId));
-    }
+  const selectAllBlogs = () => {
+    setSelectedBlogs(blogs.map((blog) => blog.id));
   };
 
-  const handleDeleteSelected = async () => {
-    // Implement your delete logic here
-    // You might want to use fetch API to call a route handler
+  const deselectAllBlogs = () => {
+    setSelectedBlogs([]);
+  };
+
+  const deleteSelectedBlogs = async () => {
     try {
-      console.log({ data: selectedBlogs });
-      await axios.delete("/api/blogs", { data: { ids: selectedBlogs } });
-      setBlogList((prev) =>
-        prev.filter((blog) => !selectedBlogs.includes(blog.blogId))
+      await axios.delete("/api/blogs", {
+        data: { ids: selectedBlogs },
+      });
+      setSelectedBlogs((prev) =>
+        prev.filter((blog) => !selectedBlogs.includes(blog))
       );
-      setSelectedBlogs([]);
     } catch (error) {
       console.error("Error deleting blogs:", error);
     }
@@ -72,59 +73,45 @@ const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
 
   return (
     <div>
-      <Flex gap="3" mb="4" align="center">
-        <Button>
-          <Link href="/blogs/new">New Blog</Link>
-        </Button>
-
+      <Flex gap="2" mb="4">
+        <Button onClick={selectAllBlogs}>Select All</Button>
+        <Button onClick={deselectAllBlogs}>Deselect All</Button>
         {selectedBlogs.length > 0 && (
-          <Button color="red" onClick={handleDeleteSelected}>
-            Delete Selected ({selectedBlogs.length})
+          <Button color="red" onClick={deleteSelectedBlogs}>
+            Delete Selected
           </Button>
         )}
       </Flex>
 
-      <Table.Root variant="surface">
+      <Table.Root>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>
-              <Checkbox
-                checked={
-                  selectedBlogs.length === blogs.length && blogs.length > 0
-                }
-                className={
-                  selectedBlogs.length > 0 &&
-                  selectedBlogs.length < blogs.length
-                    ? "indeterminate"
-                    : ""
-                }
-                onCheckedChange={toggleAllBlogs}
-              />
-            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Select</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Title</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Author</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Comments</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Status</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Created</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
+
         <Table.Body>
-          {blogList.map((blog) => (
-            <Table.Row key={blog.blogId}>
+          {blogs.map((blog) => (
+            <Table.Row key={blog.id}>
               <Table.Cell>
                 <Checkbox
-                  checked={selectedBlogs.includes(blog.blogId)}
-                  onCheckedChange={() => toggleBlogSelection(blog.blogId)}
+                  checked={selectedBlogs.includes(blog.id)}
+                  onCheckedChange={() => toggleBlogSelection(blog.id)}
                 />
               </Table.Cell>
-              <Table.RowHeaderCell>{blog.title}</Table.RowHeaderCell>
-              <Table.Cell>{blog.author.name}</Table.Cell>
-              <Table.Cell>{blog.createdAt.toDateString()}</Table.Cell>
-              <Table.Cell>{blog.comments.length}</Table.Cell>
-              <Table.Cell>{blog.isPublished ? "Published" : "Draft"}</Table.Cell>
+              <Table.Cell>{blog.title}</Table.Cell>
               <Table.Cell>
-                <Link href={`/blogs/${blog.blogId}`}>View</Link>
+                {blog.isPublished ? "Published" : "Draft"}
+              </Table.Cell>
+              <Table.Cell>
+                {new Date(blog.createdAt).toLocaleDateString()}
+              </Table.Cell>
+              <Table.Cell>
+                <Link href={`/blogs/${blog.id}`}>View</Link>
               </Table.Cell>
             </Table.Row>
           ))}
@@ -134,4 +121,4 @@ const BlogsTable = ({ blogs }: { blogs: Blog[] }) => {
   );
 };
 
-export default BlogsTable;
+export default BlogTable;

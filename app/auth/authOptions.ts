@@ -1,9 +1,7 @@
+import prisma from "@/prisma/client";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import prisma from "@/prisma/client";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
 
 const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -17,8 +15,8 @@ const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
-      if (session.user) {
+    session: async ({ session, token }) => {
+      if (session?.user) {
         session.user.id = token.sub!;
       }
       return session;
@@ -26,4 +24,4 @@ const authOptions: NextAuthOptions = {
   },
 };
 
-export default authOptions; 
+export default authOptions;

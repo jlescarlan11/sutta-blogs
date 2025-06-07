@@ -6,11 +6,11 @@ const BlogsPage = async () => {
     include: {
       comments: {
         include: {
-          user: true
-        }
+          user: true,
+        },
       },
-      author: true
-    }
+      author: true,
+    },
   });
 
   return (
