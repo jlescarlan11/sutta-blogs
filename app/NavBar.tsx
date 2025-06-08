@@ -162,21 +162,21 @@ const NavBar = () => {
                 ))}
                 <li>
                   {status === "authenticated" ? (
-                    <Link
-                      href="/api/auth/signout"
-                      className="block text-[var(--purple-11)] hover:text-[var(--purple-12)] transition-colors font-medium text-sm"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    <Button
+                      className="btn btn-ghost justify-start h-10 text-base"
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      role="menuitem"
                     >
                       Log Out
-                    </Link>
+                    </Button>
                   ) : (
-                    <Link
-                      href="/api/auth/signin"
-                      className="block text-[var(--purple-11)] hover:text-[var(--purple-12)] transition-colors font-medium text-sm"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    <Button
+                      onClick={() => signIn("google")}
+                      className="btn btn-primary h-11 px-6 text-base font-medium"
+                      aria-label="Log in with Google"
                     >
-                      Log In
-                    </Link>
+                      Log in
+                    </Button>
                   )}
                 </li>
               </ul>
