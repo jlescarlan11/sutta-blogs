@@ -5,9 +5,10 @@ import authOptions from "@/app/auth/authOptions";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,7 +26,7 @@ export async function POST(
 
     // First check if the blog exists
     const blog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!blog) {
@@ -36,7 +37,7 @@ export async function POST(
       data: {
         content,
         userId: session.user.id,
-        blogId: params.id,
+        blogId: id,
       },
       include: {
         user: true,
