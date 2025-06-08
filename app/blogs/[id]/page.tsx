@@ -106,7 +106,36 @@ const BlogDetailPage = async ({ params }: Props) => {
           </Flex>
         </Flex>
         <Box className="mb-2 text-[var(--purple-12)]">
-          <Box className="prose prose-purple max-w-none prose-headings:text-[var(--purple-12)] prose-p:text-[var(--purple-12)] prose-li:text-[var(--purple-12)] prose-ul:text-[var(--purple-12)] prose-ol:text-[var(--purple-12)] prose-blockquote:text-[var(--purple-12)] prose-a:text-[var(--purple-12)]">
+          <Box
+            className="prose prose-purple max-w-none
+  prose-headings:text-[var(--purple-12)]
+  prose-lead:text-[var(--purple-12)]
+  prose-h1:text-[var(--purple-12)]
+  prose-h2:text-[var(--purple-12)]
+  prose-h3:text-[var(--purple-12)]
+  prose-h4:text-[var(--purple-12)]
+  prose-p:text-[var(--purple-12)]
+  prose-a:text-[var(--purple-12)]
+  prose-blockquote:text-[var(--purple-12)]
+  prose-figure:text-[var(--purple-12)]
+  prose-figcaption:text-[var(--purple-12)]
+  prose-strong:text-[var(--purple-12)]
+  prose-em:text-[var(--purple-12)]
+  prose-kbd:text-[var(--purple-12)]
+  prose-code:text-[var(--purple-12)]
+  prose-pre:text-[var(--purple-12)]
+  prose-ol:text-[var(--purple-12)]
+  prose-ul:text-[var(--purple-12)]
+  prose-li:text-[var(--purple-12)]
+  prose-table:text-[var(--purple-12)]
+  prose-thead:text-[var(--purple-12)]
+  prose-tr:text-[var(--purple-12)]
+  prose-th:text-[var(--purple-12)]
+  prose-td:text-[var(--purple-12)]
+  prose-img:text-[var(--purple-12)]
+  prose-video:text-[var(--purple-12)]
+  prose-hr:text-[var(--purple-12)]"
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
