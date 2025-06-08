@@ -1,12 +1,12 @@
+import authOptions from "@/app/auth/authOptions";
 import prisma from "@/prisma/client";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { createBlogSchema } from "../../ValidationSchema";
-import { getServerSession } from "next-auth";
-import authOptions from "@/app/auth/authOptions";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -41,12 +41,12 @@ export async function DELETE(request: NextRequest) {
 
     const blogs = await prisma.blogEntry.findMany({
       where: {
-        blogId: {
+        id: {
           in: ids,
         },
       },
       select: {
-        blogId: true,
+        id: true,
       },
     });
 
@@ -59,8 +59,8 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.blogEntry.deleteMany({
       where: {
-        blogId: {
-          in: blogs.map((blog) => blog.blogId),
+        id: {
+          in: blogs.map((blog) => blog.id),
         },
       },
     });

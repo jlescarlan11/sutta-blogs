@@ -15,11 +15,11 @@ import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuInfo } from "react-icons/lu";
 import { z } from "zod";
-import Header from "./Header";
+import Header from "../../new/Header";
 
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
   ssr: false,
@@ -27,11 +27,16 @@ const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
 
 type BlogFormData = z.infer<typeof createBlogSchema>;
 
-const NewBlogPage = () => {
+interface Props {
+  id: string;
+}
+
+const EditBlogForm = ({ id }: Props) => {
   const router = useRouter();
   const [isDraft, setIsDraft] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     register,
@@ -49,6 +54,26 @@ const NewBlogPage = () => {
     },
   });
 
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const response = await axios.get(`/api/blogs/${id}`);
+        const blog = response.data;
+        setValue("title", blog.title);
+        setValue("content", blog.content);
+        setIsDraft(!blog.isPublished);
+        setValue("isPublished", blog.isPublished);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+        setError("Failed to load blog data");
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [id, setValue]);
+
   const content = watch("content");
   const title = watch("title");
 
@@ -62,13 +87,11 @@ const NewBlogPage = () => {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsSubmitting(true);
-      const now = new Date();
-      await axios.post("/api/blogs", {
+      await axios.patch(`/api/blogs/${id}`, {
         ...data,
         isPublished: !isDraft,
         readTime,
-        createdAt: now,
-        updatedAt: now,
+        updatedAt: new Date(),
       });
       router.push("/blogs");
       router.refresh();
@@ -78,6 +101,14 @@ const NewBlogPage = () => {
       setIsSubmitting(false);
     }
   });
+
+  if (isLoading) {
+    return (
+      <Box className="min-h-screen flex items-center justify-center">
+        <Text>Loading...</Text>
+      </Box>
+    );
+  }
 
   return (
     <Box className="min-h-screen">
@@ -93,7 +124,7 @@ const NewBlogPage = () => {
                 <Flex direction="column" gap="4">
                   <Box>
                     <Flex direction="column" gap="4">
-                      <Text size="2" weight="medium" className=" block">
+                      <Text size="2" weight="medium" className="block">
                         Blog Title
                       </Text>
                       <TextField.Root
@@ -188,11 +219,7 @@ const NewBlogPage = () => {
                     size="3"
                     className="min-w-[120px] px-8 py-2"
                   >
-                    {isSubmitting
-                      ? "Submitting..."
-                      : isDraft
-                      ? "Save as Draft"
-                      : "Publish"}
+                    {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
                 </Flex>
               </Box>
@@ -204,4 +231,4 @@ const NewBlogPage = () => {
   );
 };
 
-export default NewBlogPage;
+export default EditBlogForm;

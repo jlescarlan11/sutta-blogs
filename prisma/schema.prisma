@@ -13,68 +13,114 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  userId    String          @id @default(uuid())
-  name      String
-  email     String
-  image     String
-  blogs     BlogEntry[]
-  followers UserFollowed[]  @relation("follower")
-  following UserFollowed[]  @relation("followee")
-  comments  UserCommented[]
-  likes     UserLiked[]
-  views     UserViewed[]
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
-model UserFollowed {
-  followerId String
-  followeeId String
-  follower   User   @relation("follower", fields: [followerId], references: [userId])
-  followee   User   @relation("followee", fields: [followeeId], references: [userId])
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([followerId, followeeId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  blogs         BlogEntry[]
+  comments      UserCommented[]
+  likes         UserLiked[]
+  views         UserViewed[]
+  accounts      Account[]
+  sessions      Session[]
+  commentLikes  UserCommentLike[]
+
+  @@map("users")
 }
 
 model BlogEntry {
-  blogId      String          @id @default(uuid())
+  id          String          @id @default(uuid())
   title       String
   content     String
   isPublished Boolean         @default(false)
-  readTime    Int            @default(0)
+  readTime    Int             @default(0)
   createdAt   DateTime        @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime        @updatedAt
   userId      String
-  author      User            @relation(fields: [userId], references: [userId])
-  comments    UserCommented[]
-  likes       UserLiked[]
-  views       UserViewed[]
+  author      User            @relation(fields: [userId], references: [id])
+  comments    UserCommented[] @relation("BlogComments")
+  likes       UserLiked[]     @relation("BlogLikes")
+  views       UserViewed[]    @relation("BlogViews")
 }
 
 model UserCommented {
-  commentId String    @id
+  id        String    @id @default(cuid())
   content   String
   createdAt DateTime  @default(now())
-  updatedAt DateTime
+  updatedAt DateTime  @updatedAt
   userId    String
   blogId    String
-  user      User      @relation(fields: [userId], references: [userId])
-  blog      BlogEntry @relation(fields: [blogId], references: [blogId])
+  user      User      @relation(fields: [userId], references: [id])
+  blog      BlogEntry @relation("BlogComments", fields: [blogId], references: [id], onDelete: Cascade)
+  likes     UserCommentLike[]
+}
+
+model UserCommentLike {
+  userId    String
+  commentId String
+  user      User           @relation(fields: [userId], references: [id])
+  comment   UserCommented  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
 }
 
 model UserLiked {
-  userId String
-  blogId String
-  user   User      @relation(fields: [userId], references: [userId])
-  blog   BlogEntry @relation(fields: [blogId], references: [blogId])
+  userId    String
+  blogId    String
+  user      User      @relation(fields: [userId], references: [id])
+  blog      BlogEntry @relation("BlogLikes", fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
 }
 
 model UserViewed {
-  userId String
-  blogId String
-  user   User      @relation(fields: [userId], references: [userId])
-  blog   BlogEntry @relation(fields: [blogId], references: [blogId])
+  userId    String
+  blogId    String
+  user      User      @relation(fields: [userId], references: [id])
+  blog      BlogEntry @relation("BlogViews", fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
 }
