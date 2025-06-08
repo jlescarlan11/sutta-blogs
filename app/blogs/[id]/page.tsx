@@ -38,10 +38,11 @@ interface BlogWithCounts extends Blog {
 const BlogDetailPage = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
+  const { id } = await params;
 
   const blog = (await prisma.blogEntry.findUnique({
     where: {
-      id: params.id,
+      id,
     },
     include: {
       author: true,
@@ -75,7 +76,7 @@ const BlogDetailPage = async ({ params }: Props) => {
         <Text size="8" weight="bold" className="!mb-2">
           {blog.title}
         </Text>
-        <Flex gap="4" align="center" className="text-[var(--plum-11)]" mb="2">
+        <Flex gap="4" align="center" className="text-[var(--purple-11)]" mb="2">
           <Flex gap="1" align="center">
             <FaUser />
             <Text size="2">{blog.author.name}</Text>
@@ -120,7 +121,7 @@ const BlogDetailPage = async ({ params }: Props) => {
           <Flex
             align="center"
             gap="2"
-            className="cursor-pointer text-[var(--plum-11)] hover:underline"
+            className="cursor-pointer text-[var(--purple-11)] hover:underline"
             mb="2"
           >
             <FaRegCommentDots />
@@ -131,16 +132,16 @@ const BlogDetailPage = async ({ params }: Props) => {
           </Flex>
         </Link>
         <Box asChild>
-          <hr className="my-2 border-[var(--plum-6)]" />
+          <hr className="my-2 border-[var(--purple-6)]" />
         </Box>
         {/* Top 3 comments */}
-        {blog.comments.length === 0 ? (
-          <Text size="2" color="gray" className="italic">
+        {!blog.comments || blog.comments.length === 0 ? (
+          <Text size="2" color="purple" className="italic">
             No comments yet.
           </Text>
         ) : (
           [...blog.comments]
-            .sort((a, b) => b.likes.length - a.likes.length)
+            .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
             .slice(0, 3)
             .map((comment, idx, arr) => (
               <React.Fragment key={comment.id}>
@@ -168,7 +169,7 @@ const BlogDetailPage = async ({ params }: Props) => {
                 </Box>
                 {idx < arr.length - 1 && (
                   <Box asChild>
-                    <hr className="my-2 border-[var(--plum-6)]" />
+                    <hr className="my-2 border-[var(--purple-6)]" />
                   </Box>
                 )}
               </React.Fragment>

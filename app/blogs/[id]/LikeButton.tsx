@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import { Flex, Text } from '@radix-ui/themes';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   blogId: string;
@@ -15,10 +16,11 @@ const LikeButton = ({ blogId, initialLikes, isLiked: initialIsLiked }: Props) =>
   const { data: session } = useSession();
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(initialIsLiked);
+  const router = useRouter();
 
   const handleLike = async () => {
     if (!session) {
-      // Handle unauthenticated user
+      router.push('/api/auth/signin');
       return;
     }
 

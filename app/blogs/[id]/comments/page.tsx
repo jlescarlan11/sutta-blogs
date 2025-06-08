@@ -1,21 +1,19 @@
 "use client";
 
+import { HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
 import {
   Avatar,
   Box,
   Button,
   Container,
   Flex,
-  Tabs,
   Text,
   TextField,
 } from "@radix-ui/themes";
 import axios from "axios";
-import { formatDistanceToNow } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { HeartFilledIcon, HeartIcon } from "@radix-ui/react-icons";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -37,6 +35,9 @@ interface Comment {
   blogId: string;
   user: User;
   likes: { userId: string; commentId: string }[];
+  _count?: {
+    likes: number;
+  };
 }
 
 interface Blog {
@@ -47,6 +48,7 @@ interface Blog {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
+  author: User;
   comments: Comment[];
 }
 
@@ -93,16 +95,14 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
     return <Text>Loading...</Text>;
   }
 
-  const topComments = [...blog.comments]
-    .sort((a, b) => (b.likes?.length ?? 0) - (a.likes?.length ?? 0))
-    .slice(0, 3);
-  const allComments = [...blog.comments].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim() || !session) return;
+    if (!comment.trim()) return;
+
+    if (!session) {
+      router.push("/api/auth/signin");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -153,7 +153,9 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
 
     setIsSubmitting(true);
     try {
-      await axios.delete(`/api/blogs/${blogId}/comments?commentId=${commentId}`);
+      await axios.delete(
+        `/api/blogs/${blogId}/comments?commentId=${commentId}`
+      );
       const response = await axios.get(`/api/blogs/${blogId}`);
       setBlog(response.data);
     } catch (error) {
@@ -164,21 +166,26 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
   };
 
   const handleLikeComment = async (commentId: string) => {
-    if (!session) return;
+    if (!session) {
+      router.push("/api/auth/signin");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const response = await axios.patch(`/api/blogs/${blogId}/comments?commentId=${commentId}`);
+      const response = await axios.patch(
+        `/api/blogs/${blogId}/comments?commentId=${commentId}`
+      );
       const updatedComment = response.data;
-      
+
       // Update the blog state with the updated comment
-      setBlog(prevBlog => {
+      setBlog((prevBlog) => {
         if (!prevBlog) return prevBlog;
         return {
           ...prevBlog,
-          comments: prevBlog.comments.map(comment => 
+          comments: prevBlog.comments.map((comment) =>
             comment.id === commentId ? updatedComment : comment
-          )
+          ),
         };
       });
     } catch (error) {
@@ -186,102 +193,6 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const renderComment = (comment: Comment) => {
-    const isOwner = session?.user?.id === comment.userId;
-    const isEditing = editingComment === comment.id;
-    const hasLiked = comment.likes?.some(like => like.userId === session?.user?.id) ?? false;
-    const likeCount = comment.likes?.length ?? 0;
-
-    console.log('Comment ID:', comment.id, 'Has Liked:', hasLiked, 'Likes:', comment.likes);
-
-    return (
-      <Box key={comment.id} className="mb-4 p-4 border rounded">
-        <Flex gap="2" align="center" mb="2" justify="between">
-          <Flex gap="2" align="center">
-            <Avatar
-              src={comment.user.image || ""}
-              fallback={comment.user.name[0]}
-              size="1"
-            />
-            <Text size="2">
-              {comment.user.name} •{" "}
-              {formatDistanceToNow(new Date(comment.createdAt), {
-                addSuffix: true,
-              })}
-            </Text>
-          </Flex>
-          <Flex gap="2" align="center">
-            <Button
-              variant="soft"
-              color={hasLiked ? "red" : "gray"}
-              onClick={() => handleLikeComment(comment.id)}
-              disabled={isSubmitting}
-              className="flex items-center gap-1"
-            >
-              {hasLiked ? (
-                <HeartFilledIcon width="16" height="16" />
-              ) : (
-                <HeartIcon width="16" height="16" />
-              )}
-              {likeCount > 0 && <span>{likeCount}</span>}
-            </Button>
-            {isOwner && !isEditing && (
-              <>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  onClick={() => handleEdit(comment)}
-                  disabled={isSubmitting}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="soft"
-                  color="red"
-                  onClick={() => handleDeleteComment(comment.id)}
-                  disabled={isSubmitting}
-                >
-                  Delete
-                </Button>
-              </>
-            )}
-          </Flex>
-        </Flex>
-        {isEditing ? (
-          <Flex direction="column" gap="2">
-            <TextField.Root>
-              <TextField.Slot>
-                <input
-                  value={editContent}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditContent(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </TextField.Slot>
-            </TextField.Root>
-            <Flex gap="2">
-              <Button
-                onClick={() => handleUpdateComment(comment.id)}
-                disabled={isSubmitting || !editContent.trim()}
-              >
-                Save
-              </Button>
-              <Button
-                variant="soft"
-                color="gray"
-                onClick={handleCancelEdit}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-            </Flex>
-          </Flex>
-        ) : (
-          <Text size="2">{comment.content}</Text>
-        )}
-      </Box>
-    );
   };
 
   return (
@@ -296,37 +207,155 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
             <Flex direction="column" gap="2">
               <TextField.Root
                 placeholder="Write a comment..."
+                size="3"
                 value={comment}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setComment(e.target.value)
                 }
                 disabled={isSubmitting}
               ></TextField.Root>
-              <Button type="submit" disabled={isSubmitting || !comment.trim()}>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !comment.trim()}
+                size="3"
+              >
                 {isSubmitting ? "Posting..." : "Post Comment"}
               </Button>
             </Flex>
           </form>
         ) : (
-          <Text size="2" color="gray">
+          <Text size="2" color="purple">
             Please sign in to leave a comment.
           </Text>
         )}
 
-        <Tabs.Root defaultValue="top">
-          <Tabs.List>
-            <Tabs.Trigger value="top">Top Comments</Tabs.Trigger>
-            <Tabs.Trigger value="all">All Comments</Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="top">
-            {topComments.length === 0 && <Text>No comments yet.</Text>}
-            {topComments.map(renderComment)}
-          </Tabs.Content>
-          <Tabs.Content value="all">
-            {allComments.length === 0 && <Text>No comments yet.</Text>}
-            {allComments.map(renderComment)}
-          </Tabs.Content>
-        </Tabs.Root>
+        {!blog.comments || blog.comments.length === 0 ? (
+          <Text size="2" color="purple" className="italic">
+            No comments yet.
+          </Text>
+        ) : (
+          [...blog.comments]
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
+            .map((comment, idx, arr) => (
+              <React.Fragment key={comment.id}>
+                <Box className="mb-2">
+                  <Flex gap="2" align="center" justify="between">
+                    <Flex gap="2" align="center">
+                      <Avatar
+                        src={comment.user.image || ""}
+                        fallback={comment.user.name[0]}
+                        size="1"
+                      />
+                      <Text weight="bold" size="2">
+                        {comment.user.name}
+                      </Text>
+                      <Text size="2" color="purple">
+                        {new Date(comment.createdAt).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}
+                      </Text>
+                    </Flex>
+                    {session?.user?.id === comment.userId && (
+                      <Flex gap="2">
+                        <Button
+                          size="3"
+                          variant="soft"
+                          color="purple"
+                          onClick={() => handleEdit(comment)}
+                          disabled={isSubmitting}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="3"
+                          variant="soft"
+                          color="red"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          disabled={isSubmitting}
+                        >
+                          Delete
+                        </Button>
+                      </Flex>
+                    )}
+                  </Flex>
+                  {editingComment === comment.id ? (
+                    <Flex direction="column" gap="2" mt="2">
+                      <TextField.Root
+                        size="3"
+                        value={editContent}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setEditContent(e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      ></TextField.Root>
+                      <Flex gap="2">
+                        <Button
+                          size="3"
+                          onClick={() => handleUpdateComment(comment.id)}
+                          disabled={isSubmitting || !editContent.trim()}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="3"
+                          variant="soft"
+                          color="purple"
+                          onClick={handleCancelEdit}
+                          disabled={isSubmitting}
+                        >
+                          Cancel
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  ) : (
+                    <Text size="2" className="block mt-1">
+                      {comment.content}
+                    </Text>
+                  )}
+                  <Flex gap="1" align="center" mt="1">
+                    {(() => {
+                      const hasLiked = comment.likes?.some(
+                        (like) => like.userId === session?.user?.id
+                      );
+                      return (
+                        <Button
+                          size="3"
+                          variant="ghost"
+                          color={hasLiked ? "red" : "purple"}
+                          onClick={() => handleLikeComment(comment.id)}
+                          disabled={isSubmitting || !session}
+                          className="flex items-center gap-1"
+                        >
+                          {hasLiked ? (
+                            <HeartFilledIcon width="16" height="16" />
+                          ) : (
+                            <HeartIcon width="16" height="16" />
+                          )}
+                          <Text size="2" color={hasLiked ? "red" : "purple"}>
+                            {comment._count?.likes || 0}
+                          </Text>
+                        </Button>
+                      );
+                    })()}
+                  </Flex>
+                </Box>
+                {idx < arr.length - 1 && (
+                  <Box asChild>
+                    <hr className="my-2 border-[var(--purple-6)]" />
+                  </Box>
+                )}
+              </React.Fragment>
+            ))
+        )}
       </Box>
     </Container>
   );

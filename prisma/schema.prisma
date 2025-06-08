@@ -59,8 +59,6 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   blogs         BlogEntry[]
-  followers     UserFollowed[]  @relation("follower")
-  following     UserFollowed[]  @relation("followee")
   comments      UserCommented[]
   likes         UserLiked[]
   views         UserViewed[]
@@ -69,15 +67,6 @@ model User {
   commentLikes  UserCommentLike[]
 
   @@map("users")
-}
-
-model UserFollowed {
-  followerId String
-  followeeId String
-  follower   User   @relation("follower", fields: [followerId], references: [id])
-  followee   User   @relation("followee", fields: [followeeId], references: [id])
-
-  @@id([followerId, followeeId])
 }
 
 model BlogEntry {

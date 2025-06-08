@@ -88,7 +88,7 @@ const NewBlogPage = () => {
               <Header />
             </Box>
 
-            <Box className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <Box className="bg-white rounded-2xl shadow-sm border border-purple-200 overflow-hidden">
               <Box className="p-6 sm:p-8">
                 <Flex direction="column" gap="4">
                   <Box>
@@ -140,7 +140,7 @@ const NewBlogPage = () => {
                       </Flex>
                     </Callout.Root>
 
-                    <Box className="border border-gray-200 rounded-lg overflow-hidden">
+                    <Box className="border border-purple-200 rounded-lg overflow-hidden">
                       <Controller
                         name="content"
                         control={control}
@@ -161,7 +161,7 @@ const NewBlogPage = () => {
                 </Flex>
               </Box>
 
-              <Box className="border-t border-gray-200 bg-gray-50 px-6 py-4 sm:px-8">
+              <Box className="border-t border-purple-200 bg-purple-50 px-6 py-4 sm:px-8">
                 {error && (
                   <Callout.Root color="red" className="mb-4">
                     <Callout.Text>{error}</Callout.Text>

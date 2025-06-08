@@ -1,279 +1,85 @@
-import prisma from "@/prisma/client";
-import { BlogEntry, UserCommented, User, Prisma } from "@prisma/client";
+import axios from 'axios';
+import { BlogWithRelations, BlogFilters, CreateBlogData, UpdateBlogData, CommentResponse } from '@/types/blog';
 
-type BlogWithRelations = BlogEntry & {
-  author: User;
-  comments: (UserCommented & {
-    user: User;
-    likes: {
-      userId: string;
-      commentId: string;
-    }[];
-  })[];
-  _count?: {
-    comments?: number;
-    likes?: number;
-    views?: number;
-  };
-};
-
-type BlogFilters = {
-  search?: string;
-  author?: string;
-  sort?: string;
-};
-
-type BlogQueryOptions = {
-  where?: Prisma.BlogEntryWhereInput;
-  orderBy?: Prisma.BlogEntryOrderByWithRelationInput;
-};
-
-type SortOption =
-  | "title-asc"
-  | "title-desc"
-  | "dateAdded-desc"
-  | "dateAdded-asc"
-  | "comments-desc"
-  | "views-desc";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export class BlogService {
-  static async buildWhereClause(
-    filters: BlogFilters
-  ): Promise<BlogQueryOptions["where"]> {
-    const { search, author } = filters;
-    const whereClause: BlogQueryOptions["where"] = {};
-
-    if (author && author !== "all") {
-      whereClause.userId = author;
-    }
-
-    if (search) {
-      const searchTerm = search.toLowerCase();
-      whereClause.OR = [
-        {
-          title: {
-            contains: searchTerm,
-            mode: "insensitive",
-          },
-        },
-        {
-          content: {
-            contains: searchTerm,
-            mode: "insensitive",
-          },
-        },
-      ];
-    }
-
-    return whereClause;
-  }
-
-  static buildOrderByClause(sortOption?: string): BlogQueryOptions["orderBy"] {
-    if (!sortOption) {
-      return { createdAt: "desc" };
-    }
-
-    switch (sortOption as SortOption) {
-      case "title-asc":
-        return { title: "asc" };
-      case "title-desc":
-        return { title: "desc" };
-      case "dateAdded-desc":
-        return { createdAt: "desc" };
-      case "dateAdded-asc":
-        return { createdAt: "asc" };
-      case "comments-desc":
-        return { comments: { _count: "desc" } };
-      case "views-desc":
-        return { views: { _count: "desc" } };
-      default:
-        return { createdAt: "desc" };
-    }
-  }
-
   static async getBlogs(filters: BlogFilters): Promise<BlogWithRelations[]> {
     try {
-      const { sort } = filters;
-      const whereClause = await this.buildWhereClause(filters);
-      const orderBy = this.buildOrderByClause(sort);
-
-      const blogs = await prisma.blogEntry.findMany({
-        where: whereClause,
-        orderBy,
-        include: {
-          author: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
-          _count: {
-            select: {
-              comments: true,
-              likes: true,
-              views: true,
-            },
-          },
-        },
-      });
-
-      // Map comments to include empty likes array
-      return blogs.map(blog => ({
-        ...blog,
-        comments: blog.comments.map(comment => ({
-          ...comment,
-          likes: [],
-        })),
-      }));
+      const response = await axios.get(`${API_BASE_URL}/api/blogs`, { params: filters });
+      return response.data;
     } catch (error) {
       console.error("Error fetching blogs:", error);
       throw error;
-    } finally {
-      await prisma.$disconnect();
     }
   }
 
-  static async getBlogById(id: string): Promise<BlogWithRelations | null> {
+  static async getBlogById(id: string): Promise<BlogWithRelations> {
     try {
-      const blog = await prisma.blogEntry.findUnique({
-        where: { id },
-        include: {
-          author: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
-          _count: {
-            select: {
-              comments: true,
-              likes: true,
-              views: true,
-            },
-          },
-        },
-      });
-
-      if (!blog) return null;
-      return {
-        ...blog,
-        comments: blog.comments.map(comment => ({
-          ...comment,
-          likes: [],
-        })),
-      };
+      const response = await axios.get(`${API_BASE_URL}/api/blogs/${id}`);
+      return response.data;
     } catch (error) {
       console.error("Error fetching blog:", error);
       throw error;
-    } finally {
-      await prisma.$disconnect();
     }
   }
 
-  static async getBlogCount(filters: BlogFilters): Promise<number> {
-    const whereClause = await this.buildWhereClause(filters);
-    return await prisma.blogEntry.count({ where: whereClause });
-  }
-
-  static async getFeaturedBlogs(): Promise<BlogWithRelations[]> {
+  static async createBlog(data: CreateBlogData): Promise<BlogWithRelations> {
     try {
-      const blogs = await prisma.blogEntry.findMany({
-        take: 10,
-        orderBy: [
-          { views: { _count: "desc" } },
-          { comments: { _count: "desc" } },
-        ],
-        include: {
-          author: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
-          _count: {
-            select: {
-              comments: true,
-              likes: true,
-              views: true,
-            },
-          },
-        },
-      });
-
-      // Map comments to include empty likes array
-      return blogs.map(blog => ({
-        ...blog,
-        comments: blog.comments.map(comment => ({
-          ...comment,
-          likes: [],
-        })),
-      }));
+      const response = await axios.post(`${API_BASE_URL}/api/blogs`, data);
+      return response.data;
     } catch (error) {
-      console.error("Error fetching featured blogs:", error);
+      console.error("Error creating blog:", error);
       throw error;
-    } finally {
-      await prisma.$disconnect();
     }
   }
 
-  static async updateBlog(id: string, data: Partial<BlogEntry>) {
+  static async updateBlog(id: string, data: UpdateBlogData): Promise<BlogWithRelations> {
     try {
-      const updated = await prisma.blogEntry.update({
-        where: { id },
-        data,
-      });
-      // Return the full blog with relations
-      const updatedBlog = await prisma.blogEntry.findUnique({
-        where: { id },
-        include: {
-          author: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-      if (!updatedBlog) return null;
-      return {
-        ...updatedBlog,
-        comments: updatedBlog.comments.map(comment => ({
-          ...comment,
-          likes: [],
-        })),
-      };
+      const response = await axios.patch(`${API_BASE_URL}/api/blogs/${id}`, data);
+      return response.data;
     } catch (error) {
       console.error("Error updating blog:", error);
-      return null;
+      throw error;
     }
   }
 
-  static async deleteBlog(id: string) {
+  static async deleteBlog(id: string): Promise<void> {
     try {
-      // Get the blog with relations before deleting
-      const blog = await prisma.blogEntry.findUnique({
-        where: { id },
-        include: {
-          author: true,
-          comments: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-      if (!blog) return null;
-      await prisma.blogEntry.delete({ where: { id } });
-      return {
-        ...blog,
-        comments: blog.comments.map(comment => ({
-          ...comment,
-          likes: [],
-        })),
-      };
+      await axios.delete(`${API_BASE_URL}/api/blogs/${id}`);
     } catch (error) {
       console.error("Error deleting blog:", error);
-      return null;
+      throw error;
+    }
+  }
+
+  static async likeBlog(id: string): Promise<{ likes: number; isLiked: boolean }> {
+    try {
+      const response = await axios.patch(`${API_BASE_URL}/api/blogs/${id}/like`);
+      return response.data;
+    } catch (error) {
+      console.error("Error liking blog:", error);
+      throw error;
+    }
+  }
+
+  static async commentOnBlog(id: string, content: string): Promise<CommentResponse> {
+    try {
+      const response = await axios.post(`/api/blogs/${id}/comments`, { content });
+      return response.data;
+    } catch (error) {
+      console.error("Error commenting on blog:", error);
+      throw error;
+    }
+  }
+
+  static async likeComment(commentId: string): Promise<{ likes: number; isLiked: boolean }> {
+    try {
+      const response = await axios.patch(`/api/blogs/${commentId}/comment-like`);
+      return response.data;
+    } catch (error) {
+      console.error("Error liking comment:", error);
+      throw error;
     }
   }
 } 

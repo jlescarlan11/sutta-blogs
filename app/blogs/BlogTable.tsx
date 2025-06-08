@@ -103,7 +103,10 @@ const BlogTable = ({ blogs }: Props) => {
         (status === "draft" && !blog.isPublished);
       return matchesSearch && matchesStatus;
     })
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
 
   return (
     <Box>
@@ -123,7 +126,7 @@ const BlogTable = ({ blogs }: Props) => {
         </TextField.Root>
 
         <Select.Root value={status} onValueChange={setStatus} size="3">
-          <Select.Trigger variant="soft" color="plum" />
+          <Select.Trigger variant="soft" color="purple" />
           <Select.Content>
             <Select.Item value="all">Status</Select.Item>
             <Select.Item value="published">Published</Select.Item>
@@ -286,7 +289,7 @@ const BlogTable = ({ blogs }: Props) => {
                           className="animate-spin h-4 w-4"
                           viewBox="0 0 24 24"
                         >
-                          <circle 
+                          <circle
                             className="opacity-25"
                             cx="12"
                             cy="12"

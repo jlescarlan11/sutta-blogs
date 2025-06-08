@@ -40,11 +40,6 @@ export async function POST(
       },
       include: {
         user: true,
-        likes: {
-          include: {
-            user: true,
-          },
-        },
       },
     });
 
@@ -171,11 +166,7 @@ export async function PATCH(request: NextRequest) {
     const comment = await prisma.userCommented.findUnique({
       where: { id: commentId },
       include: {
-        likes: {
-          include: {
-            user: true,
-          },
-        },
+        user: true,
       },
     });
 
@@ -216,9 +207,10 @@ export async function PATCH(request: NextRequest) {
       where: { id: commentId },
       include: {
         user: true,
-        likes: {
-          include: {
-            user: true,
+        likes: true,
+        _count: {
+          select: {
+            likes: true,
           },
         },
       },
