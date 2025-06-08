@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: Props) {
             Search Results
           </Text>
           <Text color="purple">
-            Found {blogs.length} results for "{query}"
+            Found {blogs.length} results for &quot;{query}&quot;
           </Text>
         </Box>
 

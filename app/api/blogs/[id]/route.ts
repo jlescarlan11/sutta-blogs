@@ -54,7 +54,11 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const updateData: any = {};
+    const updateData: {
+      title?: string;
+      content?: string;
+      isPublished?: boolean;
+    } = {};
 
     if (body.title) updateData.title = body.title;
     if (body.content) updateData.content = body.content;
