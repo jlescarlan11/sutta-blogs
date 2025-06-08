@@ -1,7 +1,7 @@
 "use client";
-import { Box, Container, Flex } from "@radix-ui/themes";
+import { Box, Button, Container, Flex } from "@radix-ui/themes";
 import classNames from "classnames";
-import { useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -93,19 +93,22 @@ const NavBar = () => {
           {/* Desktop Logout/Login */}
           <div className="hidden md:block">
             {status === "authenticated" ? (
-              <Link
-                href="/api/auth/signout"
-                className="text-[var(--purple-11)] hover:text-[var(--purple-12)] transition-colors font-medium text-sm"
+              <Button
+                variant="ghost"
+                className="btn btn-ghost justify-start h-11 w-full text-base"
+                onClick={() => signOut({ callbackUrl: "/" })}
               >
                 Log Out
-              </Link>
+              </Button>
             ) : (
-              <Link
-                href="/api/auth/signin"
-                className="text-[var(--purple-11)] hover:text-[var(--purple-12)] transition-colors font-medium text-sm"
+              <Button
+                variant="ghost"
+                onClick={() => signIn("google")}
+                className="btn btn-primary h-11 px-6 text-base font-medium"
+                aria-label="Log in with Google"
               >
-                Log In
-              </Link>
+                Log in
+              </Button>
             )}
           </div>
 

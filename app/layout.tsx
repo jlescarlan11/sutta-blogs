@@ -1,6 +1,6 @@
 import { Container, Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Lora, Mansalva } from "next/font/google";
 import AuthProvider from "./auth/Provider";
 import "./globals.css";
@@ -32,11 +32,20 @@ const lora = Lora({
   preload: true,
 });
 
-export const metadata: Metadata = {
-  title: "Sutta Blogs",
-  description: "A platform for sharing and discovering Buddhist teachings",
-  viewport: "width=device-width, initial-scale=1",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#ffffff",
+};
+
+export const metadata: Metadata = {
+  title: "Blog it",
+  description: "A platform for sharing and discovering thought and ideas",
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({
