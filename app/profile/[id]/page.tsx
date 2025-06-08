@@ -12,6 +12,13 @@ import { FaRegCommentDots, FaRegEye, FaRegHeart } from "react-icons/fa";
 import Link from "next/link";
 import React from "react";
 
+interface Blog {
+  id: string;
+  views: { createdAt: Date; userId: string; blogId: string }[];
+  likes: { createdAt: Date; userId: string; blogId: string }[];
+  comments: { id: string; content: string; createdAt: Date; updatedAt: Date; userId: string; blogId: string }[];
+}
+
 interface Props {
   params: { id: string };
 }
@@ -44,15 +51,15 @@ export default async function ProfileIdPage({ params }: Props) {
   const publishedBlogs = user.blogs;
   const totalPublished = publishedBlogs.length;
   const totalViews = publishedBlogs.reduce(
-    (acc: number, blog: any) => acc + blog.views.length,
+    (acc: number, blog: Blog) => acc + blog.views.length,
     0
   );
   const totalLikes = publishedBlogs.reduce(
-    (acc: number, blog: any) => acc + blog.likes.length,
+    (acc: number, blog: Blog) => acc + blog.likes.length,
     0
   );
   const totalComments = publishedBlogs.reduce(
-    (acc: number, blog: any) => acc + blog.comments.length,
+    (acc: number, blog: Blog) => acc + blog.comments.length,
     0
   );
 
