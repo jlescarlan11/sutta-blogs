@@ -1,7 +1,8 @@
-import { Avatar } from "@radix-ui/themes";
+import Image from "next/image";
+import AppLogo from "../public/logo.svg";
 
 const Logo = () => {
-  return <Avatar fallback="B" radius="full" />;
+  return <Image src={AppLogo} height="40" width="40" alt="Blog It Logo" />;
 };
 
 export default Logo;

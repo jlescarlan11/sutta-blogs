@@ -5,11 +5,12 @@ import { FaRegCommentDots, FaRegEye, FaRegHeart } from "react-icons/fa";
 import { notFound } from "next/navigation";
 
 interface Props {
-  searchParams: { q: string };
+  searchParams: Promise<{ q: string }>;
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const query = searchParams.q;
+  const { q } = await searchParams;
+  const query = q;
 
   if (!query) {
     notFound();
