@@ -5,7 +5,13 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <Flex justify="between" align="center" className=" mb-6">
+    <Flex
+      justify="between"
+      align="center"
+      className=" mb-6"
+      wrap="wrap-reverse"
+      gap="4"
+    >
       <Flex direction="column" gap="2">
         <Text size="6" weight="bold">
           Create New Blog

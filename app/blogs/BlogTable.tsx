@@ -110,8 +110,9 @@ const BlogTable = ({ blogs }: Props) => {
 
   return (
     <Box>
-      <Flex gap="4" mb="8">
+      <Flex wrap="wrap" gap="4" mb="8" className="w-full">
         <TextField.Root
+          className="flex-1 min-w-[min(100%,200px)]"
           placeholder="Search Posts..."
           value={search}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -126,7 +127,11 @@ const BlogTable = ({ blogs }: Props) => {
         </TextField.Root>
 
         <Select.Root value={status} onValueChange={setStatus} size="3">
-          <Select.Trigger variant="soft" color="purple" />
+          <Select.Trigger
+            className="flex-1 min-w-[min(100%,200px)]"
+            variant="soft"
+            color="purple"
+          />
           <Select.Content>
             <Select.Item value="all">Status</Select.Item>
             <Select.Item value="published">Published</Select.Item>
@@ -135,6 +140,7 @@ const BlogTable = ({ blogs }: Props) => {
         </Select.Root>
 
         <Button
+          className="flex-1 min-w-[min(100%,200px)]"
           variant="soft"
           size="3"
           onClick={() => router.push("/blogs/new")}
@@ -144,6 +150,7 @@ const BlogTable = ({ blogs }: Props) => {
 
         {selectedBlogs.length > 0 && (
           <Button
+            className="flex-1 min-w-[min(100%,200px)]"
             color="red"
             variant="soft"
             onClick={deleteSelectedBlogs}

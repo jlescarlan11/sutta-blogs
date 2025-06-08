@@ -30,7 +30,7 @@ export default async function Home() {
 
   return (
     <Container size="3" className="py-8">
-      <Flex justify="between" align="center" mb="6">
+      <Flex justify="between" align="center" mb="6" wrap="wrap-reverse" gap="4">
         <Text size="5" weight="bold">
           Explore latest blog posts and articles
         </Text>

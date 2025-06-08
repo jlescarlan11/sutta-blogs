@@ -2,6 +2,7 @@ import { Container, Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import type { Metadata, Viewport } from "next";
 import { Inter, Lora, Mansalva } from "next/font/google";
+import { FC, ReactNode } from "react";
 import AuthProvider from "./auth/Provider";
 import "./globals.css";
 import NavBar from "./NavBar";
@@ -37,6 +38,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#ffffff",
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export const metadata: Metadata = {
@@ -47,13 +50,15 @@ export const metadata: Metadata = {
     shortcut: '/logo.svg',
     apple: '/logo.svg',
   },
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#ffffff",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+const RootLayout: FC<RootLayoutProps> = ({ children }) => {
   return (
     <html
       lang="en"
@@ -61,14 +66,14 @@ export default function RootLayout({
     >
       <body className="antialiased min-h-dvh bg-[var(--purple-1)] text-[var(--purple-11)]">
         <AuthProvider>
-          <Theme accentColor="purple">
+          <Theme accentColor="purple" scaling="100%">
             <Flex
               direction="column"
               className="min-h-dvh text-[var(--purple-12)]"
             >
               <NavBar />
-              <main className="flex-1">
-                <Container size="3" className="py-8 px-4 sm:px-6 lg:px-8">
+              <main className="flex-1 w-full">
+                <Container size="3" className="py-8 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
                   {children}
                 </Container>
               </main>
@@ -79,4 +84,6 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

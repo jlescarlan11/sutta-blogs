@@ -42,14 +42,14 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <Container size="3" className="py-8">
       <Flex direction="column" gap="6">
-        <Box>
+        <Flex align="center" gap="4" wrap="wrap">
           <Text size="6" weight="bold" className="mb-2">
             Search Results
           </Text>
           <Text color="purple">
             Found {blogs.length} results for &quot;{query}&quot;
           </Text>
-        </Box>
+        </Flex>
 
         {blogs.length === 0 ? (
           <Flex align="center" justify="center" className="min-h-[200px]">
