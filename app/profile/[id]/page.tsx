@@ -86,33 +86,41 @@ export default async function ProfileIdPage({ params }: Props) {
         </Text>
         <Text>{user.email}</Text>
       </Flex>
-      <Flex justify="center" gap="8" className="my-8">
+      <Flex justify="center" gap="4" className="my-8">
         <Flex direction="column" align="center">
           <Text size="6" weight="bold">
             {totalPublished}
           </Text>
-          <Text color="purple">Total Published Post</Text>
+          <Text className="text-xs sm:text-base" color="purple" align="center">
+            Published Post
+          </Text>
         </Flex>
         <Separator orientation="vertical" size="2" />
         <Flex direction="column" align="center">
           <Text size="6" weight="bold">
             {totalViews}
           </Text>
-          <Text color="purple">Total Post Views</Text>
+          <Text className="text-xs sm:text-base" color="purple" align="center">
+            Total Views
+          </Text>
         </Flex>
         <Separator orientation="vertical" size="2" />
         <Flex direction="column" align="center">
           <Text size="6" weight="bold">
             {totalLikes}
           </Text>
-          <Text color="purple">Total Post Likes</Text>
+          <Text className="text-xs sm:text-base" color="purple" align="center">
+            Total Likes
+          </Text>
         </Flex>
         <Separator orientation="vertical" size="2" />
         <Flex direction="column" align="center">
           <Text size="6" weight="bold">
             {totalComments}
           </Text>
-          <Text color="purple">Total Post Comments</Text>
+          <Text className="text-xs sm:text-base" color="purple" align="center">
+            Total Comments
+          </Text>
         </Flex>
       </Flex>
       {publishedBlogs.length === 0 ? (
