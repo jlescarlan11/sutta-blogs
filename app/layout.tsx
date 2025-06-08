@@ -5,6 +5,7 @@ import { Inter, Lora, Mansalva } from "next/font/google";
 import AuthProvider from "./auth/Provider";
 import "./globals.css";
 import NavBar from "./NavBar";
+import Footer from "./Footer";
 import "./theme-config.css";
 
 // Configure Inter as default font
@@ -71,6 +72,7 @@ export default function RootLayout({
                   {children}
                 </Container>
               </main>
+              <Footer />
             </Flex>
           </Theme>
         </AuthProvider>
