@@ -105,8 +105,8 @@ const BlogDetailPage = async ({ params }: Props) => {
             <Text size="2">{blog._count.comments}</Text>
           </Flex>
         </Flex>
-        <Box className="mb-2">
-          <Box className="prose prose-purple max-w-none">
+        <Box className="mb-2 text-[var(--purple-12)]">
+          <Box className="prose prose-purple max-w-none prose-headings:text-[var(--purple-12)] prose-p:text-[var(--purple-12)] prose-li:text-[var(--purple-12)] prose-ul:text-[var(--purple-12)] prose-ol:text-[var(--purple-12)] prose-blockquote:text-[var(--purple-12)] prose-a:text-[var(--purple-12)]">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -117,7 +117,7 @@ const BlogDetailPage = async ({ params }: Props) => {
                   <ol className="list-decimal pl-6 space-y-1" {...props} />
                 ),
                 li: ({ ...props }) => (
-                  <li className="marker:text-purple-600" {...props} />
+                  <li className="marker:text-[var(--purple-12)]" {...props} />
                 ),
               }}
             >
