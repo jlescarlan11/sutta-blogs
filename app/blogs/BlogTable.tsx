@@ -180,11 +180,11 @@ const BlogTable = ({ blogs }: Props) => {
         )}
       </Flex>
 
-      <Box>
-        <Table.Root size="3" variant="surface" layout="auto">
+      <Box className="w-full overflow-x-auto">
+        <Table.Root size="3" variant="surface" layout="auto" className="w-full">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell style={{ width: "50px" }}>
+              <Table.ColumnHeaderCell style={{ width: "60px" }}>
                 <Checkbox
                   checked={
                     selectedBlogs.length === blogs.length && blogs.length > 0
@@ -196,7 +196,7 @@ const BlogTable = ({ blogs }: Props) => {
                   }
                 />
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "40%" }}>
+              <Table.ColumnHeaderCell style={{ width: "45%" }}>
                 Title
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell style={{ width: "15%" }}>
@@ -205,7 +205,7 @@ const BlogTable = ({ blogs }: Props) => {
               <Table.ColumnHeaderCell style={{ width: "15%" }}>
                 Status
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "20%" }}>
+              <Table.ColumnHeaderCell style={{ width: "15%" }}>
                 Action
               </Table.ColumnHeaderCell>
             </Table.Row>
