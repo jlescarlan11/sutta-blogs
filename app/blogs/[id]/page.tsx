@@ -22,8 +22,9 @@ import LikeButton from "./LikeButton";
 import ShareButton from "./ShareButton";
 import ViewCounter from "./ViewCounter";
 
-interface Props {
+type Props = {
   params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 interface BlogWithCounts extends Blog {
