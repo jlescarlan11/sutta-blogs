@@ -23,9 +23,9 @@ import ShareButton from "./ShareButton";
 import ViewCounter from "./ViewCounter";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
-}
+};
 
 interface BlogWithCounts extends Blog {
   _count: {
