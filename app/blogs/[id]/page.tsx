@@ -106,9 +106,24 @@ const BlogDetailPage = async ({ params }: Props) => {
           </Flex>
         </Flex>
         <Box className="mb-2">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {blog.content}
-          </ReactMarkdown>
+          <Box className="prose prose-purple max-w-none">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                ul: ({ node, ...props }) => (
+                  <ul className="list-disc pl-6 space-y-1" {...props} />
+                ),
+                ol: ({ node, ...props }) => (
+                  <ol className="list-decimal pl-6 space-y-1" {...props} />
+                ),
+                li: ({ node, ...props }) => (
+                  <li className="marker:text-purple-600" {...props} />
+                ),
+              }}
+            >
+              {blog.content}
+            </ReactMarkdown>
+          </Box>
         </Box>
         <Flex gap="4" align="center" mb="2">
           <LikeButton
