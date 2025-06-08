@@ -1,6 +1,7 @@
 import prisma from "@/prisma/client";
-import BlogTable from "./BlogTable";
 import { Blog } from "@/types";
+import BlogTable from "./BlogTable";
+import Header from "./Header";
 
 const BlogsPage = async () => {
   const blogsData = await prisma.blogEntry.findMany({
@@ -15,16 +16,17 @@ const BlogsPage = async () => {
   });
 
   // Transform the data to match our expected types
-  const blogs: Blog[] = blogsData.map(blog => ({
+  const blogs: Blog[] = blogsData.map((blog) => ({
     ...blog,
-    comments: blog.comments.map(comment => ({
+    comments: blog.comments.map((comment) => ({
       ...comment,
       likes: [], // Initialize with empty likes array since we're not using them in the table
     })),
   }));
 
   return (
-    <div>
+    <div className="">
+      <Header />
       <BlogTable blogs={blogs} />
     </div>
   );

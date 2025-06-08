@@ -117,7 +117,14 @@ export class BlogService {
         },
       });
 
-      return blogs;
+      // Map comments to include empty likes array
+      return blogs.map(blog => ({
+        ...blog,
+        comments: blog.comments.map(comment => ({
+          ...comment,
+          likes: [],
+        })),
+      }));
     } catch (error) {
       console.error("Error fetching blogs:", error);
       throw error;
@@ -135,8 +142,7 @@ export class BlogService {
           comments: {
             include: {
               user: true,
-              likes: true
-            }
+            },
           },
           _count: {
             select: {
@@ -148,7 +154,14 @@ export class BlogService {
         },
       });
 
-      return blog;
+      if (!blog) return null;
+      return {
+        ...blog,
+        comments: blog.comments.map(comment => ({
+          ...comment,
+          likes: [],
+        })),
+      };
     } catch (error) {
       console.error("Error fetching blog:", error);
       throw error;
@@ -187,12 +200,80 @@ export class BlogService {
         },
       });
 
-      return blogs;
+      // Map comments to include empty likes array
+      return blogs.map(blog => ({
+        ...blog,
+        comments: blog.comments.map(comment => ({
+          ...comment,
+          likes: [],
+        })),
+      }));
     } catch (error) {
       console.error("Error fetching featured blogs:", error);
       throw error;
     } finally {
       await prisma.$disconnect();
+    }
+  }
+
+  static async updateBlog(id: string, data: Partial<BlogEntry>) {
+    try {
+      const updated = await prisma.blogEntry.update({
+        where: { id },
+        data,
+      });
+      // Return the full blog with relations
+      const updatedBlog = await prisma.blogEntry.findUnique({
+        where: { id },
+        include: {
+          author: true,
+          comments: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+      if (!updatedBlog) return null;
+      return {
+        ...updatedBlog,
+        comments: updatedBlog.comments.map(comment => ({
+          ...comment,
+          likes: [],
+        })),
+      };
+    } catch (error) {
+      console.error("Error updating blog:", error);
+      return null;
+    }
+  }
+
+  static async deleteBlog(id: string) {
+    try {
+      // Get the blog with relations before deleting
+      const blog = await prisma.blogEntry.findUnique({
+        where: { id },
+        include: {
+          author: true,
+          comments: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+      if (!blog) return null;
+      await prisma.blogEntry.delete({ where: { id } });
+      return {
+        ...blog,
+        comments: blog.comments.map(comment => ({
+          ...comment,
+          likes: [],
+        })),
+      };
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      return null;
     }
   }
 } 

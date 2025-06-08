@@ -90,9 +90,9 @@ model BlogEntry {
   updatedAt   DateTime        @updatedAt
   userId      String
   author      User            @relation(fields: [userId], references: [id])
-  comments    UserCommented[]
-  likes       UserLiked[]
-  views       UserViewed[]
+  comments    UserCommented[] @relation("BlogComments")
+  likes       UserLiked[]     @relation("BlogLikes")
+  views       UserViewed[]    @relation("BlogViews")
 }
 
 model UserCommented {
@@ -103,7 +103,7 @@ model UserCommented {
   userId    String
   blogId    String
   user      User      @relation(fields: [userId], references: [id])
-  blog      BlogEntry @relation(fields: [blogId], references: [id])
+  blog      BlogEntry @relation("BlogComments", fields: [blogId], references: [id], onDelete: Cascade)
   likes     UserCommentLike[]
 }
 
@@ -111,7 +111,7 @@ model UserCommentLike {
   userId    String
   commentId String
   user      User           @relation(fields: [userId], references: [id])
-  comment   UserCommented  @relation(fields: [commentId], references: [id])
+  comment   UserCommented  @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@id([userId, commentId])
 }
@@ -120,7 +120,7 @@ model UserLiked {
   userId    String
   blogId    String
   user      User      @relation(fields: [userId], references: [id])
-  blog      BlogEntry @relation(fields: [blogId], references: [id])
+  blog      BlogEntry @relation("BlogLikes", fields: [blogId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
@@ -130,7 +130,7 @@ model UserViewed {
   userId    String
   blogId    String
   user      User      @relation(fields: [userId], references: [id])
-  blog      BlogEntry @relation(fields: [blogId], references: [id])
+  blog      BlogEntry @relation("BlogViews", fields: [blogId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
 
   @@id([userId, blogId])
