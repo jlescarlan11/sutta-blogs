@@ -1,7 +1,12 @@
 import EditBlogForm from "./EditBlogForm";
 
-const EditBlogPage = ({ params }: { params: { id: string } }) => {
-  return <EditBlogForm id={params.id} />;
+const EditBlogPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = await params;
+  return <EditBlogForm id={id} />;
 };
 
-export default EditBlogPage; 
+export default EditBlogPage;

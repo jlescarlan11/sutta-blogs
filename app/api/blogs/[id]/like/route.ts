@@ -5,9 +5,10 @@ import authOptions from "@/app/auth/authOptions";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,7 @@ export async function PATCH(
 
     // Check if the blog exists
     const blog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         likes: true,
         _count: {
@@ -33,7 +34,7 @@ export async function PATCH(
     // Check if user has already liked the blog
     const existingLike = await prisma.userLiked.findFirst({
       where: {
-        blogId: params.id,
+        blogId: id,
         userId: session.user.id,
       },
     });
@@ -44,7 +45,7 @@ export async function PATCH(
         where: {
           userId_blogId: {
             userId: session.user.id,
-            blogId: params.id,
+            blogId: id,
           },
         },
       });
@@ -52,7 +53,7 @@ export async function PATCH(
       // Like the blog
       await prisma.userLiked.create({
         data: {
-          blogId: params.id,
+          blogId: id,
           userId: session.user.id,
         },
       });
@@ -60,7 +61,7 @@ export async function PATCH(
 
     // Get updated like count
     const updatedBlog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         likes: true,
         _count: {
@@ -82,4 +83,4 @@ export async function PATCH(
       { status: 500 }
     );
   }
-} 
+}

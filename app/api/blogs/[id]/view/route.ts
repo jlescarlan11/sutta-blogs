@@ -5,9 +5,10 @@ import authOptions from "@/app/auth/authOptions";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,7 @@ export async function POST(
 
     // Check if the blog exists
     const blog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!blog) {
@@ -25,7 +26,7 @@ export async function POST(
     // Check if user has already viewed the blog in the last 24 hours
     const lastView = await prisma.userViewed.findFirst({
       where: {
-        blogId: params.id,
+        blogId: id,
         userId: session.user.id,
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
@@ -37,7 +38,7 @@ export async function POST(
       // Record new view
       await prisma.userViewed.create({
         data: {
-          blogId: params.id,
+          blogId: id,
           userId: session.user.id,
         },
       });
@@ -51,4 +52,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}

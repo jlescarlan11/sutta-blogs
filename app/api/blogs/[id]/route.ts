@@ -5,11 +5,12 @@ import authOptions from "@/app/auth/authOptions";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const blog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: true,
         comments: {
@@ -36,18 +37,16 @@ export async function GET(
     return NextResponse.json(blog);
   } catch (error) {
     console.error("Error in GET /api/blogs/[id]:", error);
-    return NextResponse.json(
-      { error: "Error fetching blog" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error fetching blog" }, { status: 500 });
   }
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -62,11 +61,12 @@ export async function PATCH(
 
     if (body.title) updateData.title = body.title;
     if (body.content) updateData.content = body.content;
-    if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
+    if (body.isPublished !== undefined)
+      updateData.isPublished = body.isPublished;
 
     // First check if the blog exists and belongs to the user
     const existingBlog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingBlog) {
@@ -78,7 +78,7 @@ export async function PATCH(
     }
 
     const updatedBlog = await prisma.blogEntry.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         author: true,
@@ -101,9 +101,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -111,7 +112,7 @@ export async function DELETE(
 
     // First check if the blog exists and belongs to the user
     const existingBlog = await prisma.blogEntry.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingBlog) {
@@ -123,7 +124,7 @@ export async function DELETE(
     }
 
     await prisma.blogEntry.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return new NextResponse(null, { status: 204 });
@@ -131,4 +132,4 @@ export async function DELETE(
     console.error("Error in DELETE /api/blogs/[id]:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-} 
+}
