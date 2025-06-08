@@ -16,16 +16,24 @@ interface Blog {
   id: string;
   views: { createdAt: Date; userId: string; blogId: string }[];
   likes: { createdAt: Date; userId: string; blogId: string }[];
-  comments: { id: string; content: string; createdAt: Date; updatedAt: Date; userId: string; blogId: string }[];
+  comments: {
+    id: string;
+    content: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+    blogId: string;
+  }[];
 }
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function ProfileIdPage({ params }: Props) {
+  const { id } = await params;
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       blogs: {
         where: { isPublished: true },
