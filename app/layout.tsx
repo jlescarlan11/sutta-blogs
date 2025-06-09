@@ -46,12 +46,15 @@ export const metadata: Metadata = {
   title: "Blog it",
   description: "A platform for sharing and discovering thought and ideas",
   icons: {
-    icon: '/logo.svg',
-    shortcut: '/logo.svg',
-    apple: '/logo.svg',
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
   viewport: "width=device-width, initial-scale=1",
   themeColor: "#ffffff",
+  verification: {
+    google: "Z22mijyAZckzLjEbp3X1k45Jbxn5QcxI1omoPIyi7fA",
+  },
 };
 
 interface RootLayoutProps {
@@ -73,7 +76,10 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => {
             >
               <NavBar />
               <main className="flex-1 w-full">
-                <Container size="3" className="py-8 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+                <Container
+                  size="3"
+                  className="py-8 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl"
+                >
                   {children}
                 </Container>
               </main>
