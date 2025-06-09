@@ -2,7 +2,7 @@
 import authOptions from "@/app/auth/authOptions";
 import prisma from "@/prisma/client";
 import { Blog } from "@/types";
-import { Box, Container, Flex, Text } from "@radix-ui/themes";
+import { Box, Container, Flex, Text, Avatar } from "@radix-ui/themes";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -21,6 +21,7 @@ import CommentLikeButton from "./CommentLikeButton";
 import LikeButton from "./LikeButton";
 import ShareButton from "./ShareButton";
 import ViewCounter from "./ViewCounter";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -34,6 +35,46 @@ interface BlogWithCounts extends Blog {
     views: number;
   };
   likes: { userId: string; blogId: string }[];
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const blog = await prisma.blogEntry.findUnique({
+    where: { id },
+    include: { author: true },
+  });
+
+  if (!blog) {
+    return {
+      title: 'Blog Not Found',
+    };
+  }
+
+  return {
+    title: blog.title,
+    description: blog.content.substring(0, 160), // First 160 characters as description
+    openGraph: {
+      title: blog.title,
+      description: blog.content.substring(0, 160),
+      type: 'article',
+      authors: [blog.author.name],
+      publishedTime: blog.createdAt.toISOString(),
+      images: [
+        {
+          url: '/og-image.jpg', // You can replace this with your actual OG image
+          width: 1200,
+          height: 630,
+          alt: blog.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: blog.title,
+      description: blog.content.substring(0, 160),
+      images: ['/og-image.jpg'], // You can replace this with your actual OG image
+    },
+  };
 }
 
 const BlogDetailPage = async ({ params }: Props) => {
@@ -73,11 +114,17 @@ const BlogDetailPage = async ({ params }: Props) => {
 
   return (
     <Container>
-      <Box className="space-y-4">
+      <Box className="space-y-4 ">
         <Text size="8" weight="bold" className="!mb-2">
           {blog.title}
         </Text>
-        <Flex gap="4" align="center" className="text-[var(--purple-11)]" mb="2">
+        <Flex
+          gap="4"
+          align="center"
+          wrap="wrap"
+          className="text-[var(--purple-11)]"
+          mb="2"
+        >
           <Flex gap="1" align="center">
             <FaUser />
             <Text size="2">{blog.author.name}</Text>
@@ -107,7 +154,7 @@ const BlogDetailPage = async ({ params }: Props) => {
         </Flex>
         <Box className="mb-2 text-[var(--purple-12)]">
           <Box
-            className="prose prose-purple max-w-none
+            className="prose prose-purple max-w-none prose-headings:my-0
   prose-headings:text-[var(--purple-12)]
   prose-lead:text-[var(--purple-12)]
   prose-h1:text-[var(--purple-12)]
@@ -154,7 +201,7 @@ const BlogDetailPage = async ({ params }: Props) => {
             </ReactMarkdown>
           </Box>
         </Box>
-        <Flex gap="4" align="center" mb="2">
+        <Flex gap="4" mt="4" align="center" mb="2">
           <LikeButton
             blogId={blog.id}
             initialLikes={blog._count.likes}
@@ -191,16 +238,23 @@ const BlogDetailPage = async ({ params }: Props) => {
             .map((comment, idx, arr) => (
               <React.Fragment key={comment.id}>
                 <Box className="mb-2">
-                  <Text weight="bold" size="2">
-                    {comment.user.name}
-                  </Text>
-                  <Text size="2" className="block mb-1">
-                    {new Date(comment.createdAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </Text>
+                  <Flex gap="2" align="center" mb="4">
+                    <Avatar
+                      src={comment.user.image || ""}
+                      fallback={comment.user.name[0]}
+                      size="1"
+                    />
+                    <Text weight="bold" size="2">
+                      {comment.user.name}
+                    </Text>
+                    <Text size="2" color="purple">
+                      {new Date(comment.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </Flex>
                   <Text size="2">{comment.content}</Text>
                   <Flex gap="1" align="center" mt="1">
                     <CommentLikeButton

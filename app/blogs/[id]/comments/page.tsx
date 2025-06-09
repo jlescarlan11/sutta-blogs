@@ -243,7 +243,13 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
             .map((comment, idx, arr) => (
               <React.Fragment key={comment.id}>
                 <Box className="mb-2">
-                  <Flex gap="2" align="center" justify="between">
+                  <Flex
+                    gap="2"
+                    wrap="wrap"
+                    align="center"
+                    justify="between"
+                    mb="4"
+                  >
                     <Flex gap="2" align="center">
                       <Avatar
                         src={comment.user.image || ""}
