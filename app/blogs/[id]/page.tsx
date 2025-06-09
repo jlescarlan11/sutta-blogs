@@ -119,11 +119,10 @@ const BlogDetailPage = async ({ params }: Props) => {
           {blog.title}
         </Text>
         <Flex
-          gap="4"
           align="center"
           wrap="wrap"
-          className="text-[var(--purple-11)]"
-          mb="2"
+          className="text-[var(--purple-11)] space-x-2"
+          mb="4"
         >
           <Flex gap="1" align="center">
             <FaUser />
@@ -152,6 +151,9 @@ const BlogDetailPage = async ({ params }: Props) => {
             <Text size="2">{blog._count.comments}</Text>
           </Flex>
         </Flex>
+        <Box asChild>
+          <hr className="my-2 border-[var(--purple-6)]" />
+        </Box>
         <Box className="mb-2 text-[var(--purple-12)]">
           <Box
             className="prose prose-purple max-w-none prose-headings:my-0
