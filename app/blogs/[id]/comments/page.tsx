@@ -250,25 +250,27 @@ const CommentsPage = ({ blogId }: { blogId: string }) => {
                     justify="between"
                     mb="4"
                   >
-                    <Flex gap="2" align="center">
+                    <Flex gap="2" align="center" mb="2">
                       <Avatar
                         src={comment.user.image || ""}
                         fallback={comment.user.name[0]}
-                        size="1"
+                        size="2"
                       />
-                      <Text weight="bold" size="2">
-                        {comment.user.name}
-                      </Text>
-                      <Text size="2" color="purple">
-                        {new Date(comment.createdAt).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )}
-                      </Text>
+                      <Flex direction="column">
+                        <Text weight="bold" size="2">
+                          {comment.user.name}
+                        </Text>
+                        <Text size="1" color="purple">
+                          {new Date(comment.createdAt).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}
+                        </Text>
+                      </Flex>
                     </Flex>
                     {session?.user?.id === comment.userId && (
                       <Flex gap="2">

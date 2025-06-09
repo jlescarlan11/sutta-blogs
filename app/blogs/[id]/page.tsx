@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!blog) {
     return {
-      title: 'Blog Not Found',
+      title: "Blog Not Found",
     };
   }
 
@@ -56,12 +56,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: blog.title,
       description: blog.content.substring(0, 160),
-      type: 'article',
+      type: "article",
       authors: [blog.author.name],
       publishedTime: blog.createdAt.toISOString(),
       images: [
         {
-          url: '/og-image.jpg', // You can replace this with your actual OG image
+          url: "/og-image.jpg", // You can replace this with your actual OG image
           width: 1200,
           height: 630,
           alt: blog.title,
@@ -69,10 +69,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: blog.title,
       description: blog.content.substring(0, 160),
-      images: ['/og-image.jpg'], // You can replace this with your actual OG image
+      images: ["/og-image.jpg"], // You can replace this with your actual OG image
     },
   };
 }
@@ -242,18 +242,23 @@ const BlogDetailPage = async ({ params }: Props) => {
                     <Avatar
                       src={comment.user.image || ""}
                       fallback={comment.user.name[0]}
-                      size="1"
+                      size="2"
                     />
-                    <Text weight="bold" size="2">
-                      {comment.user.name}
-                    </Text>
-                    <Text size="2" color="purple">
-                      {new Date(comment.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </Text>
+                    <Flex direction="column">
+                      <Text weight="bold" size="2">
+                        {comment.user.name}
+                      </Text>
+                      <Text size="1" color="purple">
+                        {new Date(comment.createdAt).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}
+                      </Text>
+                    </Flex>
                   </Flex>
                   <Text size="2">{comment.content}</Text>
                   <Flex gap="1" align="center" mt="1">
