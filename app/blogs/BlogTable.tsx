@@ -188,10 +188,10 @@ const BlogTable = ({ blogs }: Props) => {
       </Flex>
 
       <Box className="w-full overflow-x-auto">
-        <Table.Root size="3" variant="surface" layout="auto" className="w-full">
+        <Table.Root size="3" variant="surface">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell style={{ width: "60px" }}>
+              <Table.ColumnHeaderCell>
                 <Checkbox
                   checked={
                     selectedBlogs.length === blogs.length && blogs.length > 0
@@ -203,18 +203,10 @@ const BlogTable = ({ blogs }: Props) => {
                   }
                 />
               </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "45%" }}>
-                Title
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "15%" }}>
-                Date
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "15%" }}>
-                Status
-              </Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell style={{ width: "15%" }}>
-                Action
-              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Title</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Status</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Action</Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
 
@@ -228,10 +220,10 @@ const BlogTable = ({ blogs }: Props) => {
                   />
                 </Table.Cell>
                 <Table.Cell>
-                  <Text>{blog.title}</Text>
+                  <Text className="truncate">{blog.title}</Text>
                 </Table.Cell>
                 <Table.Cell>
-                  <Text>
+                  <Text className="truncate">
                     {new Date(blog.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "2-digit",
