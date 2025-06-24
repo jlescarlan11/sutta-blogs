@@ -74,3 +74,74 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+    const limit = parseInt(searchParams.get('limit') || '3');
+
+    // If no email is provided, return an error
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email parameter is required" },
+        { status: 400 }
+      );
+    }
+
+    // Find the user by email
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+      select: { id: true, name: true, email: true }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Fetch the latest published blogs for the user
+    const blogs = await prisma.blogEntry.findMany({
+      where: {
+        userId: user.id,
+        isPublished: true
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        readTime: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
+
+    return NextResponse.json({
+      user: {
+        name: user.name,
+        email: user.email
+      },
+      blogs: blogs,
+      total: blogs.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
